@@ -64,8 +64,7 @@ namespace Bot_Telegram_Ver3
             if (mode == 2)
             {
                 int tuan = ChuyenNgaySangTuan(chatID, ngay);
-                if (tuan == 0) return "Tuần 0\n\nNghỉ";
-                tuan = tuan + 1;
+                tuan = (tuan+1);
                 string ngayBDTuan = ChuyenTuanSangNgayBatDauTuan(chatID, tuan);
                 DateTime _ngay = DateTime.ParseExact(ngayBDTuan, "yyyy-MM-dd", CultureInfo.CurrentCulture);
                 string queryTTSV = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
