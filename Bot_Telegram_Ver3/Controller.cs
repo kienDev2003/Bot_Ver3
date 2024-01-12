@@ -64,9 +64,11 @@ namespace Bot_Telegram_Ver3
             if (mode == 2)
             {
                 int tuan = ChuyenNgaySangTuan(chatID, ngay);
-                tuan = (tuan+1);
                 string ngayBDTuan = ChuyenTuanSangNgayBatDauTuan(chatID, tuan);
                 DateTime _ngay = DateTime.ParseExact(ngayBDTuan, "yyyy-MM-dd", CultureInfo.CurrentCulture);
+                _ngay = _ngay.AddDays(7);
+                tuan = ChuyenNgaySangTuan(chatID, _ngay.ToString("yyyy-MM-dd"));
+                string _ngayBDTuan = ChuyenTuanSangNgayBatDauTuan(chatID, tuan);
                 string queryTTSV = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
                 string ttsv = model.GetTTSV(queryTTSV);
                 string dataALL = "";
@@ -74,7 +76,7 @@ namespace Bot_Telegram_Ver3
                 for (int i = 0; i < 7; i++)
                 {
                     string thu = ChuyenThuTiengAnhSangTiengViet(_ngay.AddDays(i).DayOfWeek);
-                    string queryTKB = $"SELECT * FROM tblDataTkb WHERE NgayHoc = '{thu}' AND NgayBatDauHoc <= '{ngayBDTuan}' AND NgayKetThucHoc >= '{ngayBDTuan}' AND ChatID = '{chatID}' ORDER By TietBD ASC;";
+                    string queryTKB = $"SELECT * FROM tblDataTkb WHERE NgayHoc = '{thu}' AND NgayBatDauHoc <= '{_ngayBDTuan}' AND NgayKetThucHoc >= '{_ngayBDTuan}' AND ChatID = '{chatID}' ORDER By TietBD ASC;";
 
                     string data = model.GetTKB(queryTKB, tuan);
 
