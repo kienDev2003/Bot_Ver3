@@ -63,20 +63,20 @@ namespace Bot_Telegram_Ver3
             }
             if (mode == 2)
             {
+                DateTime _ngay = DateTime.ParseExact(ngay, "yyyy-MM-dd", CultureInfo.CurrentCulture);
+                ngay = _ngay.AddDays(7).ToString("yyyy-MM-dd");
                 int tuan = ChuyenNgaySangTuan(chatID, ngay);
+                if (tuan == 0) return "Tuần 0\n\nNghỉ";
                 string ngayBDTuan = ChuyenTuanSangNgayBatDauTuan(chatID, tuan);
-                DateTime _ngay = DateTime.ParseExact(ngayBDTuan, "yyyy-MM-dd", CultureInfo.CurrentCulture);
-                _ngay = _ngay.AddDays(7);
-                tuan = ChuyenNgaySangTuan(chatID, _ngay.ToString("yyyy-MM-dd"));
-                string _ngayBDTuan = ChuyenTuanSangNgayBatDauTuan(chatID, tuan);
+                DateTime __ngay = DateTime.ParseExact(ngayBDTuan, "yyyy-MM-dd", CultureInfo.CurrentCulture);
                 string queryTTSV = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
                 string ttsv = model.GetTTSV(queryTTSV);
                 string dataALL = "";
 
                 for (int i = 0; i < 7; i++)
                 {
-                    string thu = ChuyenThuTiengAnhSangTiengViet(_ngay.AddDays(i).DayOfWeek);
-                    string queryTKB = $"SELECT * FROM tblDataTkb WHERE NgayHoc = '{thu}' AND NgayBatDauHoc <= '{_ngayBDTuan}' AND NgayKetThucHoc >= '{_ngayBDTuan}' AND ChatID = '{chatID}' ORDER By TietBD ASC;";
+                    string thu = ChuyenThuTiengAnhSangTiengViet(__ngay.AddDays(i).DayOfWeek);
+                    string queryTKB = $"SELECT * FROM tblDataTkb WHERE NgayHoc = '{thu}' AND NgayBatDauHoc <= '{ngayBDTuan}' AND NgayKetThucHoc >= '{ngayBDTuan}' AND ChatID = '{chatID}' ORDER By TietBD ASC;";
 
                     string data = model.GetTKB(queryTKB, tuan);
 
