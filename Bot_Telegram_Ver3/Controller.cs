@@ -107,9 +107,12 @@ namespace Bot_Telegram_Ver3
                 string _chatID = chatID[i].ToString();
 
                 string queryTTSV = $"SELECT * FROM tblTTSV WHERE ChatID = '{_chatID}'";
-                string queryLichThi = $"SELECT * FROM tblDataLichThi WHERE NgayThi >= '{ngay}' AND ChatID = '{_chatID}';";
+                string queryLichThi = $"SELECT * FROM tblDataLichThi WHERE NgayThi > '{ngay}' AND ChatID = '{_chatID}';";
                 string data = model.GetLichThiModeAuto(queryLichThi);
-                if (data == "") return;
+                if (data == "") 
+                {
+                    continue;
+                }
                 string ttsv = model.GetTTSV(queryTTSV);
 
                 string dataAll = $"{ttsv}\n\n<b>Có lịch thi kết thúc học phần:</b>\n\n{data}";
@@ -185,7 +188,7 @@ namespace Bot_Telegram_Ver3
             }
             else if (themTKB && themLT)
             {
-                string text = $"Thêm dữ liệu TKB và Lịch Thi thành công";
+                string text = $"Thêm dữ liệu thành công";
                 chromeDriver.Quit();
                 return text;
             }
@@ -268,18 +271,12 @@ namespace Bot_Telegram_Ver3
             try
             {
                 chromeDriver.Navigate().GoToUrl(urlLT);
-                Thread.Sleep(1000);
 
                 if (CheckAlert(chromeDriver))
                 {
                     IAlert alert = chromeDriver.SwitchTo().Alert();
                     alert.Accept();
                 }
-
-                IWebElement _selectHocKy = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_dropNHHK"));
-                SelectElement select = new SelectElement(_selectHocKy);
-                select.SelectByValue(hocKy);
-                Thread.Sleep(1000);
 
                 string htmlLichThi = chromeDriver.PageSource;
                 return htmlLichThi;

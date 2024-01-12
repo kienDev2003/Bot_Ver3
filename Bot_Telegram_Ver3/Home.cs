@@ -101,6 +101,8 @@ namespace Bot_Telegram_Ver3
             string message = e.Message.Text;
             string chatID = e.Message.Chat.Id.ToString();
 
+            Console.WriteLine($"{chatID}: {message}");
+
             if (message == "/tkb")
             {
                 string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);

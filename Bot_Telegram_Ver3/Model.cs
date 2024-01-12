@@ -152,10 +152,14 @@ namespace Bot_Telegram_Ver3
                         thoiGian = ChuyenDoiTietDBVaSoTiet(tietBD, soTiet);
                         phongThi = reader["PhongThi"].ToString();
                         ngayThi = reader["NgayThi"].ToString();
+                        ngayThi = DateTime.ParseExact(ngayThi, "yyyy-MM-dd", CultureInfo.CurrentCulture).ToString("dd-MM-yyyy");
 
                         data += $"Môn: {tenMH}\nThời gian thi: {thoiGian}\nPhòng thi: {phongThi}\nNgày thi: {ngayThi}\n\n";
                     }
-                    data = "Chưa có lịch thi";
+                    if(data == "")
+                    {
+                        data = "Chưa có lịch thi";
+                    }
                 }
                 DBConn.CloseConn();
                 return data;
@@ -185,11 +189,12 @@ namespace Bot_Telegram_Ver3
                         thoiGian = ChuyenDoiTietDBVaSoTiet(tietBD, soTiet);
                         phongThi = reader["PhongThi"].ToString();
                         ngayThi = reader["NgayThi"].ToString();
+                        ngayThi = DateTime.ParseExact(ngayThi, "yyyy-MM-dd", CultureInfo.CurrentCulture).ToString("dd-MM-yyyy");
                         DateTime dateNow = DateTime.Now;
-                        DateTime dateNgayThi = DateTime.ParseExact(ngayThi, "yyyy-MM-dd", CultureInfo.CurrentCulture);
-                        int _soNgayConLai = ((dateNow.Day - dateNgayThi.Day) - 1);
-                        if (_soNgayConLai != 0) soNgayConLai = $"Bạn còn {_soNgayConLai} để về đích";
-                        else soNgayConLai = "Chúc bạn ngày mai thi tốt";
+                        DateTime dateNgayThi = DateTime.ParseExact(ngayThi, "dd-MM-yyyy", CultureInfo.CurrentCulture);
+                        int _soNgayConLai = ((dateNgayThi.Day - dateNow.Day) - 1);
+                        if (_soNgayConLai != 0) soNgayConLai = $"\n<b><i>BẠN CÒN {_soNgayConLai} ĐỂ VỀ ĐÍCH</i></b>";
+                        else if(_soNgayConLai <= 0) soNgayConLai = "\n<b><i>CHÚC BẠN NGÀY MAI THI TỐT</i></b>";
 
                         data += $"Môn: {tenMH}\nThời gian thi: {thoiGian}\nPhòng thi: {phongThi}\nNgày thi: {ngayThi}\n{soNgayConLai}\n\n";
                     }
