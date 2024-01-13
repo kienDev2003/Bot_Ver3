@@ -152,6 +152,13 @@ namespace Bot_Telegram_Ver3
             
         }
 
+        public string ThongTinSV(string chatID)
+        {
+            string queryTTSV = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
+            string ttsv = model.GetInfoNguoiDung(queryTTSV);
+            return ttsv;
+        }
+
         public int XoaDuLieu(string chatID)
         {
             string query = $"DELETE FROM tblDataLichThi WHERE ChatID = '{chatID}';" +

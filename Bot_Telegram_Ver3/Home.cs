@@ -28,6 +28,8 @@ namespace Bot_Telegram_Ver3
 
         private static void Main(string[] args)
         {
+            Console.OutputEncoding = Encoding.UTF8;
+
             if (bot == null)
             {
                 bot = new TelegramBotClient(tokenBot);
@@ -101,7 +103,8 @@ namespace Bot_Telegram_Ver3
             string message = e.Message.Text;
             string chatID = e.Message.Chat.Id.ToString();
 
-            Console.WriteLine($"{chatID}: {message}");
+            string infoNguoiDung = controller.ThongTinSV(chatID);
+            Console.WriteLine($"{infoNguoiDung}-- Message: {message}");
 
             if (message == "/tkb")
             {

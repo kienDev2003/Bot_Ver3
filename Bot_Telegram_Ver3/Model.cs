@@ -83,6 +83,25 @@ namespace Bot_Telegram_Ver3
             }
         }
 
+        public string GetInfoNguoiDung(string query)
+        {
+            DBConn.GetConn();
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, DBConn.conn))
+            {
+                string hoTen = "";
+
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        hoTen = reader["TenSV"].ToString();
+                    }
+                    return hoTen;
+                }
+            }
+        }
+
         public string GetTKB(string query,int tuanHT)
         {
             DBConn.GetConn();
