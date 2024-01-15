@@ -38,26 +38,26 @@ namespace Bot_Telegram_Ver3
             bot.StartReceiving();
             bot.OnMessage += Bot_OnMessage;
 
-            SetupTimer7H_PM();
-            SetupTimer8H_PM();
+            SetupTimer23H_PM();
+            SetupTimer20H_PM();
 
             Console.ReadLine();
         }
-        static void SetupTimer7H_PM()
+        static void SetupTimer23H_PM()
         {
             DateTime now = DateTime.Now;
-            DateTime scheduledTime = new DateTime(now.Year, now.Month, now.Day, 20, 00, 00);
+            DateTime scheduledTime = new DateTime(now.Year, now.Month, now.Day, 23, 55, 00);
             scheduledTime = (now > scheduledTime) ? scheduledTime.AddDays(1) : scheduledTime;
 
             TimeSpan timeUntilNextRun = scheduledTime - now;
 
             timer20H = new Timer(timeUntilNextRun.TotalMilliseconds);
-            timer20H.Elapsed += (sender, e) => AutoSendData7H(sender, e, scheduledTime);
+            timer20H.Elapsed += (sender, e) => KiemTraThayDoi(sender, e, scheduledTime);
             timer20H.AutoReset = false;
             timer20H.Start();
         }
 
-        static void SetupTimer8H_PM()
+        static void SetupTimer20H_PM()
         {
             DateTime now = DateTime.Now;
             DateTime scheduledTime = new DateTime(now.Year, now.Month, now.Day, 20, 45, 00);
@@ -66,12 +66,12 @@ namespace Bot_Telegram_Ver3
             TimeSpan timeUntilNextRun = scheduledTime - now;
 
             timer20H45 = new Timer(timeUntilNextRun.TotalMilliseconds);
-            timer20H45.Elapsed += (sender, e) => AutoSendData8H(sender, e, scheduledTime);
+            timer20H45.Elapsed += (sender, e) => GuiTKBVaLichThi(sender, e, scheduledTime);
             timer20H45.AutoReset = false;
             timer20H45.Start();
         }
 
-        private static void AutoSendData7H(object sender, ElapsedEventArgs e, DateTime scheduledTime)
+        private static void KiemTraThayDoi(object sender, ElapsedEventArgs e, DateTime scheduledTime)
         {
             // Kiểm tra thời gian dự kiến
             if (DateTime.Now > scheduledTime)
@@ -80,11 +80,11 @@ namespace Bot_Telegram_Ver3
                 controller.KiemTraThayDoi(bot);
 
                 // Thiết lập Timer cho sự kiện tiếp theo
-                SetupTimer7H_PM();
+                SetupTimer23H_PM();
             }
         }
 
-        private static void AutoSendData8H(object sender, ElapsedEventArgs e, DateTime scheduledTime)
+        private static void GuiTKBVaLichThi(object sender,ElapsedEventArgs e, DateTime scheduledTime)
         {
             // Kiểm tra thời gian dự kiến
             if (DateTime.Now > scheduledTime)
@@ -94,7 +94,7 @@ namespace Bot_Telegram_Ver3
                 controller.GuiTKBAuto(bot);
 
                 // Thiết lập Timer cho sự kiện tiếp theo
-                SetupTimer8H_PM();
+                SetupTimer20H_PM();
             }
         }
 
@@ -239,6 +239,13 @@ namespace Bot_Telegram_Ver3
             {
                 string text = message.Substring("/tb ".Length);
                 controller.GuiThongBao(bot, text);
+            }
+            else if (message.StartsWith("/tbid "))
+            {
+                int spaceIndex = message.IndexOf(' ', "/tbid ".Length);
+                string _chatID = message.Substring("/tbid ".Length, spaceIndex - "/tbid ".Length);
+                string text = message.Substring(spaceIndex + 1);
+                bot.SendTextMessageAsync(_chatID, text, ParseMode.Html);
             }
             else
             {

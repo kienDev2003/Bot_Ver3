@@ -109,6 +109,7 @@ namespace Bot_Telegram_Ver3
             using (SQLiteCommand cmd = new SQLiteCommand(query, DBConn.conn))
             {
                 string tenMH = "";
+                string nhomMH = "";
                 string thoiGian = "";
                 string phongHoc = "";
                 string data = "";
@@ -118,6 +119,7 @@ namespace Bot_Telegram_Ver3
                     while (reader.Read())
                     {
                         tenMH = reader["TenMH"].ToString();
+                        nhomMH = reader["NhomMH"].ToString();
                         int tietBD = int.Parse(reader["TietBD"].ToString());
                         int soTiet = int.Parse(reader["SoTiet"].ToString());
                         thoiGian = ChuyenDoiTietDBVaSoTiet(tietBD, soTiet);
@@ -135,7 +137,7 @@ namespace Bot_Telegram_Ver3
                         }
                         if (check)
                         {
-                            data += $"Môn: {tenMH}\nThời gian học: {thoiGian}\nPhòng: {phongHoc}\n\n";
+                            data += $"Môn: {tenMH}\nNhóm: {nhomMH}\nTiết bắt đầu: {tietBD} - Số tiết: {soTiet} {thoiGian}\nPhòng: {phongHoc}\n\n";
                         }
                     }
                     if(data == "")

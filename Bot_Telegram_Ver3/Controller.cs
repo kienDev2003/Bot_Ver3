@@ -500,17 +500,17 @@ namespace Bot_Telegram_Ver3
                 if (tkb && lt)
                 {
                     bot.SendTextMessageAsync(_chatID, $"<b>DỮ LIỆU</b> của bạn có sự thay đổi\n" +
-                                                           $"Hãy thêm lại dữ liệu và bật tự động thông báo ( nếu cần )", ParseMode.Html);
+                                                           $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
                 else if (lt)
                 {
                     bot.SendTextMessageAsync(_chatID, $"<b>LỊCH THI</b> của bạn có sự thay đổi\n" +
-                                                           $"Hãy thêm lại dữ liệu và bật tự động thông báo ( nếu cần )", ParseMode.Html);
+                                                           $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
                 else if (tkb)
                 {
                     bot.SendTextMessageAsync(_chatID, $"<b>THỜI KHÓA BIỂU</b> của bạn có sự thay đổi\n" +
-                                                           $"Hãy thêm lại dữ liệu và bật tự động thông báo ( nếu cần )", ParseMode.Html);
+                                                           $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
                 else return;
             }
@@ -520,7 +520,6 @@ namespace Bot_Telegram_Ver3
         {
             string _urlLichThi = urlLt + maSV;
             string htmlLichThiNew;
-            string html;
 
             ChromeDriverService service = ChromeDriverService.CreateDefaultService();
             service.HideCommandPromptWindow = true;
@@ -528,7 +527,7 @@ namespace Bot_Telegram_Ver3
             chromeOptions.AddArgument("--headless");
             using (var chromeDriver = new ChromeDriver(service,chromeOptions))
             {
-                chromeDriver.Navigate().GoToUrl("https://daotao.vnua.edu.vn/Default.aspx?page=gioithieu");
+                chromeDriver.Navigate().GoToUrl(_urlLichThi);
                 string htmlAll = chromeDriver.PageSource;
 
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
@@ -543,30 +542,19 @@ namespace Bot_Telegram_Ver3
                     Thread.Sleep(1000);
                     chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnXacNhan")).Click();
                     Thread.Sleep(1000);
+                    chromeDriver.Navigate().GoToUrl(_urlLichThi);
                 }
                 Thread.Sleep(1000);
-                chromeDriver.Navigate().GoToUrl(_urlLichThi);
-                Thread.Sleep(1000);
-
+                
                 if (CheckAlert(chromeDriver))
                 {
                     IAlert alert = chromeDriver.SwitchTo().Alert();
                     alert.Accept();
                 }
 
-                IWebElement _selectHocKy = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_dropNHHK"));
-                SelectElement select = new SelectElement(_selectHocKy);
-                select.SelectByValue(hocKy);
-                Thread.Sleep(1000);
-
-                html = chromeDriver.PageSource;
-
                 chromeDriver.Quit();
 
-                HtmlDocument htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(html);
-
-                var tables = htmlDocument.DocumentNode.Descendants("table")
+                var tables = doc.DocumentNode.Descendants("table")
                     .Where(table => table.Attributes.Contains("class") && table.Attributes["class"].Value == "grid-view").FirstOrDefault();
                 if (tables == null)
                 {
@@ -597,7 +585,7 @@ namespace Bot_Telegram_Ver3
             chromeOptions.AddArgument("--headless");
             using (var chromeDriver = new ChromeDriver(service,chromeOptions))
             {
-                chromeDriver.Navigate().GoToUrl("https://daotao.vnua.edu.vn/Default.aspx?page=gioithieu");
+                chromeDriver.Navigate().GoToUrl(urlTKB);
                 string htmlAll = chromeDriver.PageSource;
 
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
@@ -612,11 +600,9 @@ namespace Bot_Telegram_Ver3
                     Thread.Sleep(1000);
                     chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnXacNhan")).Click();
                     Thread.Sleep(1000);
+                    chromeDriver.Navigate().GoToUrl(urlTKB);
                 }
                 Thread.Sleep(1000);
-                chromeDriver.Navigate().GoToUrl(urlTkb);
-                Thread.Sleep(1000);
-
                 if (CheckAlert(chromeDriver))
                 {
                     IAlert alert = chromeDriver.SwitchTo().Alert();
