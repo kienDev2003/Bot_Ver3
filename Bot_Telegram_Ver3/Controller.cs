@@ -20,7 +20,6 @@ namespace Bot_Telegram_Ver3
     internal class Controller
     {
         Model model = new Model();
-        Home home = new Home();
 
         private string urlTkb = ConfigurationManager.AppSettings["urlTKB"].ToString();
         private string urlLt = ConfigurationManager.AppSettings["urlLichThi"].ToString();
@@ -101,7 +100,7 @@ namespace Bot_Telegram_Ver3
         public void GuiLichThiAuto(TelegramBotClient bot)
         {
             string ngay = DateTime.Now.ToString("yyyy-MM-dd");
-            string[] chatID = model.ListNguoiBatAuto();
+            string[] chatID = model.ListNguoiBatAuto(1);
             for (int i = 0; i < chatID.Length; i++)
             {
                 string _chatID = chatID[i].ToString();
@@ -109,7 +108,7 @@ namespace Bot_Telegram_Ver3
                 string queryTTSV = $"SELECT * FROM tblTTSV WHERE ChatID = '{_chatID}'";
                 string queryLichThi = $"SELECT * FROM tblDataLichThi WHERE NgayThi > '{ngay}' AND ChatID = '{_chatID}';";
                 string data = model.GetLichThiModeAuto(queryLichThi);
-                if (data == "") 
+                if (data == "")
                 {
                     continue;
                 }
@@ -125,7 +124,7 @@ namespace Bot_Telegram_Ver3
             DateTime date = DateTime.Now.AddDays(1);
             string ngay = date.ToString("yyyy-MM-dd");
             string thu = ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
-            string[] chatID = model.ListNguoiBatAuto();
+            string[] chatID = model.ListNguoiBatAuto(2);
             for (int i = 0; i < chatID.Length; i++)
             {
                 string _chatID = chatID[i].ToString();
@@ -135,7 +134,7 @@ namespace Bot_Telegram_Ver3
                 string queryTTSV = $"SELECT * FROM tblTTSV WHERE ChatID = '{_chatID}'";
                 string data = model.GetTKB(queryTKB, tuan);
                 string ttsv = model.GetTTSV(queryTTSV);
-                string dataAll =  $"{ttsv}\n\n<b>Thời Khóa Biểu Thứ {thu}:</b>\n\n{data}";
+                string dataAll = $"{ttsv}\n\n<b>Thời Khóa Biểu Thứ {thu}:</b>\n\n{data}";
 
                 bot.SendTextMessageAsync(_chatID, dataAll, ParseMode.Html);
             }
@@ -143,13 +142,22 @@ namespace Bot_Telegram_Ver3
 
         public void GuiThongBao(TelegramBotClient bot, string text)
         {
-            string[] chatID = model.ListNguoiBatAuto();
-            for(int i =0; i < chatID.Length; i++)
+            string[] chatID = model.ListNguoiBatAuto(1);
+            for (int i = 0; i < chatID.Length; i++)
             {
                 string _chatID = chatID[i].ToString();
                 bot.SendTextMessageAsync(_chatID, text, ParseMode.Html);
             }
-            
+
+        }
+
+        public int SetThongBao(int mode, string chatID)
+        {
+            string query = $"";
+            if (mode == 1) query = $"UPDATE tblTTSV SET Auto = '1' WHERE ChatID = '{chatID}'";
+            else query = $"UPDATE tblTTSV SET Auto = '0' WHERE ChatID = '{chatID}'";
+
+            return model.Command(query);
         }
 
         public string ThongTinSV(string chatID)
@@ -404,11 +412,11 @@ namespace Bot_Telegram_Ver3
                                                 $"('{chatId}','{maSv}','{maMH}','{tenMH}','{nhomMH}','{STC}','{maLop}','{NgayHoc}','{tietBD}','{soTiet}','{Phong}','{tuanHoc}','{ngayBDHoc}','{ngayKTHoc}')";
 
                             int check3 = model.Command(query);
-                            if(check3 > 0)
+                            if (check3 > 0)
                             {
                                 break;
                             }
-                            }
+                        }
                     }
                 }
                 return true;
@@ -483,9 +491,9 @@ namespace Bot_Telegram_Ver3
 
         public void KiemTraThayDoi(TelegramBotClient bot)
         {
-            string[] chatID = model.ListNguoiBatAuto();
+            string[] chatID = model.ListNguoiBatAuto(1);
 
-            for(int i = 0; i < chatID.Length; i++)
+            for (int i = 0; i < chatID.Length; i++)
             {
                 string _chatID = chatID[i].ToString();
 
@@ -494,8 +502,17 @@ namespace Bot_Telegram_Ver3
                 string htmlHtmlLt = model.GetChuoiHtmlLt(query);
                 string maSV = model.GetMaSVKiemTra(query);
 
-                bool tkb = KiemTraTkb(maSV, _chatID, htmlTkbCu);
-                bool lt = KiemTraLichThi(maSV, _chatID, htmlHtmlLt);
+                ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+                service.HideCommandPromptWindow = true;
+                ChromeOptions chromeOptions = new ChromeOptions();
+                chromeOptions.AddArgument("--headless");
+                IWebDriver chromeDriver = new ChromeDriver(service, chromeOptions);
+
+                bool tkb = KiemTraTkb(chromeDriver, maSV, _chatID, htmlTkbCu);
+                Thread.Sleep(1000);
+                bool lt = KiemTraLichThi(chromeDriver, maSV, _chatID, htmlHtmlLt);
+
+                chromeDriver.Quit();
 
                 if (tkb && lt)
                 {
@@ -512,20 +529,15 @@ namespace Bot_Telegram_Ver3
                     bot.SendTextMessageAsync(_chatID, $"<b>THỜI KHÓA BIỂU</b> của bạn có sự thay đổi\n" +
                                                            $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
-                else return;
+                else continue;
             }
         }
 
-        private bool KiemTraLichThi(string maSV, string chatID, string htmlLichThi)
+        private bool KiemTraLichThi(IWebDriver chromeDriver, string maSV, string chatID, string htmlLichThi)
         {
             string _urlLichThi = urlLt + maSV;
             string htmlLichThiNew;
-
-            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
-            service.HideCommandPromptWindow = true;
-            ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--headless");
-            using (var chromeDriver = new ChromeDriver(service,chromeOptions))
+            try
             {
                 chromeDriver.Navigate().GoToUrl(_urlLichThi);
                 string htmlAll = chromeDriver.PageSource;
@@ -545,14 +557,12 @@ namespace Bot_Telegram_Ver3
                     chromeDriver.Navigate().GoToUrl(_urlLichThi);
                 }
                 Thread.Sleep(1000);
-                
+
                 if (CheckAlert(chromeDriver))
                 {
                     IAlert alert = chromeDriver.SwitchTo().Alert();
                     alert.Accept();
                 }
-
-                chromeDriver.Quit();
 
                 var tables = doc.DocumentNode.Descendants("table")
                     .Where(table => table.Attributes.Contains("class") && table.Attributes["class"].Value == "grid-view").FirstOrDefault();
@@ -564,27 +574,29 @@ namespace Bot_Telegram_Ver3
                 {
                     htmlLichThiNew = tables.OuterHtml.Trim();
                 }
+            }
+            catch (Exception e)
+            {
+                htmlLichThiNew = "";
+            }
 
-                if (htmlLichThiNew != htmlLichThi)
-                {
-                    return true;
-                }
+            if (htmlLichThiNew == "") return false;
 
+            if (htmlLichThiNew != htmlLichThi)
+            {
+                return true;
             }
             return false;
         }
 
-        private bool KiemTraTkb(string maSV, string chatID, string htmlTkb)
+        private bool KiemTraTkb(IWebDriver chromeDriver, string maSV, string chatID, string htmlTkb)
         {
-            string urlTKB = urlTkb + maSV;
-            string html;
-
-            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
-            service.HideCommandPromptWindow = true;
-            ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--headless");
-            using (var chromeDriver = new ChromeDriver(service,chromeOptions))
+            string htmlTkbNew = "";
+            try
             {
+                string urlTKB = urlTkb + maSV;
+                string html;
+
                 chromeDriver.Navigate().GoToUrl(urlTKB);
                 string htmlAll = chromeDriver.PageSource;
 
@@ -625,20 +637,25 @@ namespace Bot_Telegram_Ver3
 
                 html = chromeDriver.PageSource;
 
-                chromeDriver.Quit();
-
                 HtmlAgilityPack.HtmlDocument document = new HtmlAgilityPack.HtmlDocument();
                 document.LoadHtml(html);
 
                 var _element = document.DocumentNode.Descendants("div")
             .Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Contains("grid-roll2")).FirstOrDefault();
 
-                string htmlTkbNew = _element.OuterHtml.Trim();
-                if (htmlTkbNew != htmlTkb)
-                {
-                    return true;
-                }
+                htmlTkbNew = _element.OuterHtml.Trim();
             }
+            catch (Exception ex)
+            {
+                htmlTkbNew = "";
+            }
+
+            if (htmlTkbNew == "") return false;
+            if (htmlTkbNew != htmlTkb)
+            {
+                return true;
+            }
+
             return false;
         }
 

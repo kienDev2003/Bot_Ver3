@@ -291,11 +291,14 @@ namespace Bot_Telegram_Ver3
             return false;
         }
 
-        public string[] ListNguoiBatAuto()
+        public string[] ListNguoiBatAuto(int mode)
         {
+            string query = $"";
+            if (mode == 1) query = $"SELECT * FROM tblTTSV";
+            else query = $"SELECT * FROM tblTTSV WHERE Auto = '1'";
             DBConn.GetConn();
             List<string> data = new List<string>();
-            string query = $"SELECT * FROM tblTTSV";
+            
             using(SQLiteCommand cmd = new SQLiteCommand(query,DBConn.conn))
             {
                 using(SQLiteDataReader reader = cmd.ExecuteReader())

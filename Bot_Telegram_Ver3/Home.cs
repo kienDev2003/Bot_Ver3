@@ -104,7 +104,8 @@ namespace Bot_Telegram_Ver3
             string chatID = e.Message.Chat.Id.ToString();
 
             string infoNguoiDung = controller.ThongTinSV(chatID);
-            Console.WriteLine($"{infoNguoiDung}-- Message: {message}");
+            if(infoNguoiDung == "") Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {chatID}-- Message: {message}");
+            else Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {infoNguoiDung}-- Message: {message}");
 
             if (message == "/tkb")
             {
@@ -246,6 +247,26 @@ namespace Bot_Telegram_Ver3
                 string _chatID = message.Substring("/tbid ".Length, spaceIndex - "/tbid ".Length);
                 string text = message.Substring(spaceIndex + 1);
                 bot.SendTextMessageAsync(_chatID, text, ParseMode.Html);
+            }
+            else if(message == "/btb")
+            {
+                int kq = controller.SetThongBao(1, chatID);
+                if (kq > 0)
+                {
+                    bot.SendTextMessageAsync(chatID, "Bật thông báo <b>Thành công</b>",ParseMode.Html);
+                }
+            }
+            else if(message == "/ttb")
+            {
+                int kq = controller.SetThongBao(0, chatID);
+                if (kq > 0)
+                {
+                    bot.SendTextMessageAsync(chatID, "Tắt thông báo <b>Thành công</b>", ParseMode.Html);
+                }
+            }
+            else if(message == "/kt")
+            {
+                Task.Run(() => controller.KiemTraThayDoi(bot));
             }
             else
             {
