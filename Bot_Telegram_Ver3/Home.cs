@@ -13,6 +13,7 @@ using System.Data.SQLite;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types;
 using System.Timers;
+using System.Runtime.Remoting.Messaging;
 
 namespace Bot_Telegram_Ver3
 {
@@ -25,6 +26,8 @@ namespace Bot_Telegram_Ver3
 
         static Timer timer20H = new Timer();
         static Timer timer20H45 = new Timer();
+
+        private static int run = 0;
 
         private static void Main(string[] args)
         {
@@ -183,13 +186,22 @@ namespace Bot_Telegram_Ver3
             }
             else if (message == "/xoa")
             {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu != "")
+                int xoa = 0;
+                if (run == 0)
                 {
-                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                    string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                    if (kiemTraDuLieu != "")
+                    {
+                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        return;
+                    }
+                    xoa = controller.XoaDuLieu(chatID);
+                }
+                else
+                {
+                    bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thực hiện lại sau 10 giây");
                     return;
                 }
-                int xoa = controller.XoaDuLieu(chatID);
                 if (xoa > 0)
                 {
                     bot.SendTextMessageAsync(chatID, "Xóa dữ liệu thành công");
@@ -208,21 +220,9 @@ namespace Bot_Telegram_Ver3
             }
             else if (message.StartsWith("Thêm "))
             {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu == "")
-                {
-                    bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
-                    return;
-                }
-                string maSV = message.Substring("Thêm ".Length);
-                if (long.TryParse(maSV, out long maSvValue) == false)
-                {
-                    bot.SendTextMessageAsync(chatID, "Vui lòng kiểm tra lại mã sinh viên!");
-                    return;
-                }
-                bot.SendTextMessageAsync(chatID, "Đang lấy dữ liệu! Vui lòng chờ!");
-                string kq = controller.ThemDuLieu(chatID, maSV);
-                bot.SendTextMessageAsync(chatID, kq);
+                if (run == 0) Task.Run(() => ThemDuLieu(chatID, message));
+                else bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                
             }
             else if (message == "/start")
             {
@@ -266,12 +266,41 @@ namespace Bot_Telegram_Ver3
             }
             else if(message == "/kt")
             {
-                Task.Run(() => controller.KiemTraThayDoi(bot));
+                Task.Run(() => KiemTraThayDoi()) ;
             }
             else
             {
                 bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");
             }
+        }
+
+        private static void ThemDuLieu(string chatID,string message)
+        {
+            run = 1;
+
+            string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+            if (kiemTraDuLieu == "")
+            {
+                bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
+                return;
+            }
+            string maSV = message.Substring("Thêm ".Length);
+            if (long.TryParse(maSV, out long maSvValue) == false)
+            {
+                bot.SendTextMessageAsync(chatID, "Vui lòng kiểm tra lại mã sinh viên!");
+                return;
+            }
+            bot.SendTextMessageAsync(chatID, "Đang lấy dữ liệu! Vui lòng chờ!");
+            string kq = controller.ThemDuLieu(chatID, maSV);
+            run = 0;
+            bot.SendTextMessageAsync(chatID, kq);
+        }
+
+        private static void KiemTraThayDoi()
+        {
+            run = 1;
+            controller.KiemTraThayDoi(bot);
+            run = 0;
         }
     }
 }

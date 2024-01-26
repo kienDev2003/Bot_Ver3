@@ -492,6 +492,7 @@ namespace Bot_Telegram_Ver3
         public void KiemTraThayDoi(TelegramBotClient bot)
         {
             string[] chatID = model.ListNguoiBatAuto(1);
+            if (chatID == null) return;
 
             for (int i = 0; i < chatID.Length; i++)
             {
