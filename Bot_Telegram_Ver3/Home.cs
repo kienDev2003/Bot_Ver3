@@ -77,7 +77,7 @@ namespace Bot_Telegram_Ver3
             if (DateTime.Now > scheduledTime)
             {
                 // Thực hiện các hành động cần thiết
-                controller.KiemTraThayDoi(bot);
+                Task.Run(() => controller.KiemTraThayDoi(bot));
 
                 // Thiết lập Timer cho sự kiện tiếp theo
                 SetupTimer23H_PM();
