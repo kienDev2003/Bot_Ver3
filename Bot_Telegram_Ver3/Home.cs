@@ -278,12 +278,12 @@ namespace Bot_Telegram_Ver3
         {
             run = 1;
 
-            string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-            if (kiemTraDuLieu == "")
-            {
-                bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
-                return;
-            }
+            //string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+            //if (kiemTraDuLieu == "")
+            //{
+            //    bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
+            //    return;
+            //}
             string maSV = message.Substring("Thêm ".Length);
             if (long.TryParse(maSV, out long maSvValue) == false)
             {

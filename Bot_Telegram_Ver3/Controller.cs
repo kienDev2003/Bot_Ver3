@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -240,14 +241,7 @@ namespace Bot_Telegram_Ver3
                 HtmlDocument document = new HtmlDocument();
                 document.LoadHtml(html);
 
-                var tables = document.DocumentNode.Descendants("table")
-                                    .Where(table => table.Attributes.Contains("class") && table.Attributes["class"].Value == "grid-view").FirstOrDefault();
-
-                if (tables == null)
-                {
-                    throw new Exception("");
-                }
-                ThemChuoiHTMLTKBVaoLT(tables.OuterHtml.Trim(), chatId, maSv);
+                string _KiemTraLichThi = "";
 
                 var trNodes = document.DocumentNode.Descendants("tr")
                             .Where(tr => tr.Attributes.Contains("onmouseover") && tr.Attributes["onmouseover"].Value == "className ='rowOnmouseover-GridView '");
@@ -266,7 +260,10 @@ namespace Bot_Telegram_Ver3
                     string query = $"INSERT INTO tblDataLichThi (ChatID,MaSV,MaMH,TenMH,TietBD,SoTiet,NgayThi,PhongThi)" +
                                    $" VALUES ('{chatId}','{maSv}','{maMh}','{tenMH}','{tietBD}','{soTiet}','{ngayThi}','{phongThi}')";
                     int check = model.Command(query);
+
+                    _KiemTraLichThi += $"{maMh}_{phongThi}_{tietBD}_{soTiet}_{ngayThi}\n";
                 }
+                ThemChuoiHTMLTKBVaoLT(_KiemTraLichThi, chatId, maSv);
                 return true;
             }
             catch
@@ -350,6 +347,12 @@ namespace Bot_Telegram_Ver3
                 string queryInsertNBDTH = $"UPDATE tblTTSV SET NBDHK = '{_tuanBDHoc}' WHERE ChatID = '{chatId}' AND MaSV = '{maSv}'";
                 int check1 = model.Command(queryInsertNBDTH);
                 //----------------------------------
+                //Thêm KiemTra
+                //var kiemTra = document.DocumentNode.Descendants("span")
+                //                .Where(span => span.Attributes.Contains("id") && span.Attributes["id"].Value == "ctl00_ContentPlaceHolder1_ctl00_lblNoteUpdate").FirstOrDefault();
+                //string _kiemTra = kiemTra.InnerText.Trim();
+                //ThemChuoiHTMLTKBVaoCSDL(_kiemTra, chatId, maSv);
+
                 // Thêm Dữ Liệu TKB
                 int s = 0;
                 string maMH = "";
@@ -369,7 +372,8 @@ namespace Bot_Telegram_Ver3
                 var TKB = document.DocumentNode.Descendants("div")
                 .Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Contains("grid-roll2")).FirstOrDefault();
 
-                ThemChuoiHTMLTKBVaoCSDL(TKB.OuterHtml.Trim(), chatId, maSv);
+                string _1TKB = TKB.InnerText.Trim();
+                ThemChuoiHTMLTKBVaoCSDL(_1TKB, chatId, maSv);
 
                 var tableS = TKB.Descendants("table");
                 foreach (var table in tableS)
@@ -510,23 +514,26 @@ namespace Bot_Telegram_Ver3
                 IWebDriver chromeDriver = new ChromeDriver(service, chromeOptions);
 
                 bool tkb = KiemTraTkb(chromeDriver, maSV, _chatID, htmlTkbCu);
-                Thread.Sleep(1000);
+                Thread.Sleep(3000);
                 bool lt = KiemTraLichThi(chromeDriver, maSV, _chatID, htmlHtmlLt);
 
                 chromeDriver.Quit();
 
                 if (tkb && lt)
                 {
+                    Console.WriteLine($"DL__{_chatID}");
                     bot.SendTextMessageAsync(_chatID, $"<b>DỮ LIỆU</b> của bạn có sự thay đổi\n" +
                                                            $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
                 else if (lt)
                 {
+                    Console.WriteLine($"LT__{_chatID}");
                     bot.SendTextMessageAsync(_chatID, $"<b>LỊCH THI</b> của bạn có sự thay đổi\n" +
                                                            $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
                 else if (tkb)
                 {
+                    Console.WriteLine($"TKB__{_chatID}");
                     bot.SendTextMessageAsync(_chatID, $"<b>THỜI KHÓA BIỂU</b> của bạn có sự thay đổi\n" +
                                                            $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
@@ -541,29 +548,17 @@ namespace Bot_Telegram_Ver3
             try
             {
                 chromeDriver.Navigate().GoToUrl(_urlLichThi);
-                string htmlAll = chromeDriver.PageSource;
-
-                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-                doc.LoadHtml(htmlAll);
-
-                var capcha = doc.DocumentNode.Descendants("span").Where(span => span.Attributes.Contains("id") && span.Attributes["id"].Value == "ctl00_ContentPlaceHolder1_ctl00_lblCapcha").FirstOrDefault();
-                if (capcha != null)
-                {
-                    string _capcha = capcha.InnerText.Trim();
-                    var txtCapcha = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_txtCaptcha"));
-                    txtCapcha.SendKeys(_capcha);
-                    Thread.Sleep(1000);
-                    chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnXacNhan")).Click();
-                    Thread.Sleep(1000);
-                    chromeDriver.Navigate().GoToUrl(_urlLichThi);
-                }
                 Thread.Sleep(1000);
-
                 if (CheckAlert(chromeDriver))
                 {
                     IAlert alert = chromeDriver.SwitchTo().Alert();
                     alert.Accept();
                 }
+
+                string htmlAll = chromeDriver.PageSource;
+
+                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(htmlAll);
 
                 var tables = doc.DocumentNode.Descendants("table")
                     .Where(table => table.Attributes.Contains("class") && table.Attributes["class"].Value == "grid-view").FirstOrDefault();
@@ -573,7 +568,25 @@ namespace Bot_Telegram_Ver3
                 }
                 else
                 {
-                    htmlLichThiNew = tables.OuterHtml.Trim();
+                    string _KiemTraLichThi = "";
+
+                    var trNodes = doc.DocumentNode.Descendants("tr")
+                                .Where(tr => tr.Attributes.Contains("onmouseover") && tr.Attributes["onmouseover"].Value == "className ='rowOnmouseover-GridView '");
+                    foreach (var trNode in trNodes)
+                    {
+                        var tdNodes = trNode.Descendants("td").ToArray();
+
+                        string maMh = tdNodes[1].InnerText.Trim();
+                        string tenMH = tdNodes[2].InnerText.Trim();
+                        string phongThi = tdNodes[9].InnerText.Trim();
+                        string tietBD = tdNodes[7].InnerText.Trim();
+                        string soTiet = tdNodes[8].InnerText.Trim();
+                        string ngayThi = tdNodes[6].InnerText.Trim();
+                        ngayThi = DateTime.ParseExact(ngayThi, "dd/MM/yyyy", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
+
+                        _KiemTraLichThi += $"{maMh}_{phongThi}_{tietBD}_{soTiet}_{ngayThi}\n";
+                    }
+                    htmlLichThiNew = _KiemTraLichThi;
                 }
             }
             catch (Exception e)
@@ -594,7 +607,7 @@ namespace Bot_Telegram_Ver3
         {
             string htmlTkbNew = "";
             try
-            {
+            { 
                 string urlTKB = urlTkb + maSV;
                 string html;
 
@@ -641,10 +654,10 @@ namespace Bot_Telegram_Ver3
                 HtmlAgilityPack.HtmlDocument document = new HtmlAgilityPack.HtmlDocument();
                 document.LoadHtml(html);
 
-                var _element = document.DocumentNode.Descendants("div")
-            .Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Contains("grid-roll2")).FirstOrDefault();
+                var TKB = document.DocumentNode.Descendants("div")
+                .Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Contains("grid-roll2")).FirstOrDefault();
 
-                htmlTkbNew = _element.OuterHtml.Trim();
+                htmlTkbNew = TKB.InnerText.Trim();
             }
             catch (Exception ex)
             {
