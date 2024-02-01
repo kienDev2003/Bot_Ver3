@@ -8,6 +8,7 @@ using System.Configuration;
 using System.Data.SQLite;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace Bot_Telegram_Ver3
         private string urlTkb = ConfigurationManager.AppSettings["urlTKB"].ToString();
         private string urlLt = ConfigurationManager.AppSettings["urlLichThi"].ToString();
         private static string hocKy = ConfigurationManager.AppSettings["hocKy"].ToString();
+        private static string urlDiem = ConfigurationManager.AppSettings["urlDiem"].ToString();
         private char _hocKy = hocKy.Last();
 
         public string GuiTKB(string chatID, string ngay, string thu)
@@ -96,6 +98,116 @@ namespace Bot_Telegram_Ver3
             string ttsv = model.GetTTSV(queryTTSV);
 
             return $"{ttsv}\n\n<b>Có lịch thi kết thúc học phần:</b>\n\n{data}";
+        }
+
+        public string GuiDiem(string chatID, int mode)
+        {
+            string hocKyXemDiem = "";
+            if (mode == 1) hocKyXemDiem = (Convert.ToInt32(hocKy) - 1).ToString();
+            else hocKyXemDiem = hocKy;
+
+            string query = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
+            string msv = model.GetMaSVKiemTra(query);
+
+            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+            service.HideCommandPromptWindow = true;
+            ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.AddArgument("--headless");
+            IWebDriver chromeDriver = new ChromeDriver(service, chromeOptions);
+
+            chromeDriver.Navigate().GoToUrl(urlDiem + msv);
+
+            var txtHocKy = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_txtChonHK"));
+            txtHocKy.SendKeys(hocKyXemDiem);
+
+            Thread.Sleep(1000);
+
+            chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnChonHK")).Click();
+
+            string htmlDiem = chromeDriver.PageSource;
+
+            HtmlDocument htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(htmlDiem);
+
+            string textHocKy = "";
+            string tenMH = "";
+            string diemCC = "";
+            string diemGK = "";
+            string diemCK = "";
+            string diemTKHeSo = "";
+            string diemTKHeChu = "";
+            string textDiem = "";
+            string temp = "";
+            string diemTBHe10 = "";
+            string diemTBHe4 = "";
+            string diemTBTichLuyHe10 = "";
+            string diemTBTichLuyHe4 = "";
+            string soTinTichLuyKy = "";
+            string tongSoTinTichLuy = "";
+            string phanLoaiHocKy = "";
+
+
+            var table = htmlDocument.DocumentNode.Descendants("table").Where(tables => tables.Attributes.Contains("class") && tables.Attributes["class"].Value == "view-table").FirstOrDefault();
+
+            var trHocKy = table.Descendants("tr").Where(_tr => _tr.Attributes.Contains("class") && _tr.Attributes["class"].Value == "title-hk-diem").FirstOrDefault();
+            textHocKy = trHocKy.InnerText.Trim();
+
+            var trDiemMH = table.Descendants("tr").Where(_tr => _tr.Attributes.Contains("class") && _tr.Attributes["class"].Value == "row-diem");
+            foreach (var tr in trDiemMH)
+            {
+                var tdDiemMH = tr.Descendants("td").ToList();
+
+                tenMH = tdDiemMH.ElementAt(2).InnerText.Trim();
+                diemCC = tdDiemMH.ElementAt(8).InnerText.Trim();
+                diemGK = tdDiemMH.ElementAt(9).InnerText.Trim();
+                diemCK = tdDiemMH.ElementAt(10).InnerText.Trim();
+                diemTKHeSo = tdDiemMH.ElementAt(10).InnerText.Trim();
+                diemTKHeChu = tdDiemMH.ElementAt(12).InnerText.Trim();
+
+                if(diemTKHeSo == "&nbsp;")
+                {
+                    diemTKHeSo = "Chưa có";
+                    diemTKHeChu = "Chưa có";
+                }
+
+                textDiem += $"Môn: {tenMH}\nĐiểm Tổng: <b> {diemTKHeSo}</b>\nĐiểm Tổng( Chữ ): <b> {diemTKHeChu}</b>\n\n";
+            }
+
+            var trDiemTK = table.Descendants("tr").Where(_tr => _tr.Attributes.Contains("class") && _tr.Attributes["class"].Value == "row-diemTK").ToList();
+            for (int i = 0; i < trDiemTK.Count; i++)
+            {
+                var tdDiem = trDiemTK[i].Descendants("td");
+                foreach (var td in tdDiem)
+                {
+                    var spanDiem = td.Descendants("span").ToList();
+                    temp = spanDiem.ElementAt(1).InnerText.Trim();
+                }
+
+                if (i == 0) diemTBHe10 = temp;
+                if (i == 1) diemTBHe4 = temp;
+                if (i == 2) diemTBTichLuyHe10 = temp;
+                if (i == 3) diemTBTichLuyHe4 = temp;
+                if (i == 4) soTinTichLuyKy = temp;
+                if (i == 5) tongSoTinTichLuy = temp;
+                if (i == 6) phanLoaiHocKy = temp;
+            }
+
+            string queryTTSV = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
+            string ttsv = model.GetTTSV(queryTTSV);
+
+            string textDiemTK = $"Điểm TB HK ( Hệ 10 ): <b> {diemTBHe10}</b>\n" +
+                                $"Điểm TB HK ( Hệ 4 ): <b> {diemTBHe4}</b>\n" +
+                                $"Điểm TB Tích Lũy: <b> {diemTBTichLuyHe10}</b>\n" +
+                                $"Điểm TB Tích Lũy ( Hệ 4 ): <b> {diemTBTichLuyHe4}</b>\n" +
+                                $"STC Đạt: <b> {soTinTichLuyKy}</b>\n" +
+                                $"Tổng STC Tích Lũy: <b> {tongSoTinTichLuy}</b>\n" +
+                                $"Phân loại Điểm TB HK: <b> {phanLoaiHocKy}</b>";
+
+            string data = $"{ttsv}\n\n{textHocKy}\n\n{textDiem}{textDiemTK}";
+
+            chromeDriver.Quit();
+
+            return data;
         }
 
         public void GuiLichThiAuto(TelegramBotClient bot)
@@ -607,7 +719,7 @@ namespace Bot_Telegram_Ver3
         {
             string htmlTkbNew = "";
             try
-            { 
+            {
                 string urlTKB = urlTkb + maSV;
                 string html;
 

@@ -268,6 +268,14 @@ namespace Bot_Telegram_Ver3
             {
                 Task.Run(() => KiemTraThayDoi()) ;
             }
+            else if (message == "/diemBefore")
+            {
+                Task.Run(() => XemDiem(chatID,1));
+            }
+            else if (message == "/diemPresent")
+            {
+                Task.Run(() => XemDiem(chatID, 0));
+            }
             else
             {
                 bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");
@@ -278,12 +286,12 @@ namespace Bot_Telegram_Ver3
         {
             run = 1;
 
-            //string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-            //if (kiemTraDuLieu == "")
-            //{
-            //    bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
-            //    return;
-            //}
+            string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+            if (kiemTraDuLieu == "")
+            {
+                bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
+                return;
+            }
             string maSV = message.Substring("Thêm ".Length);
             if (long.TryParse(maSV, out long maSvValue) == false)
             {
@@ -301,6 +309,12 @@ namespace Bot_Telegram_Ver3
             run = 1;
             controller.KiemTraThayDoi(bot);
             run = 0;
+        }
+
+        private static void XemDiem(string chatID,int mode)
+        {
+            string diem = controller.GuiDiem(chatID, mode);
+            bot.SendTextMessageAsync(chatID , diem,ParseMode.Html);
         }
     }
 }
