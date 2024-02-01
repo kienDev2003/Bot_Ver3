@@ -268,12 +268,24 @@ namespace Bot_Telegram_Ver3
             {
                 Task.Run(() => KiemTraThayDoi()) ;
             }
-            else if (message == "/diemBefore")
+            else if (message == "/diembefore")
             {
+                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                if (kiemTraDuLieu == "")
+                {
+                    bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
+                    return;
+                }
                 Task.Run(() => XemDiem(chatID,1));
             }
-            else if (message == "/diemPresent")
+            else if (message == "/diempresent")
             {
+                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                if (kiemTraDuLieu == "")
+                {
+                    bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
+                    return;
+                }
                 Task.Run(() => XemDiem(chatID, 0));
             }
             else
