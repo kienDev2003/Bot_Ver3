@@ -121,6 +121,51 @@ namespace Bot_Telegram_Ver3
             var batThongBao = new KeyboardButton("Bật Thông Báo");
             var tatThongBao = new KeyboardButton("Tắt Thông Báo");
 
+            var keyboard = new ReplyKeyboardMarkup(
+                                new[]
+                    {
+                        new[]
+                        {
+                        themDuLieu
+                        },
+
+                        new[]
+                        {
+                            thoiKhoaBieu,
+                            thoiKhoaBieuMai
+                        },
+
+                        new[]
+                        {
+                            lichHocTuanNay,
+                            lichHocTuanSau
+                        },
+
+                        new[]
+                        {
+                            diemHKTruoc,
+                            diemHKNay
+                        },
+
+                        new[]
+                        {
+                            lichThi,
+                            thoiGianBieu
+                        },
+
+                        new[]
+                        {
+                            batThongBao,
+                            tatThongBao
+                        },
+
+                        new[]
+                        {
+                            xoaDuLieu,
+                        },
+                    }
+                                );
+
             string infoNguoiDung = controller.ThongTinSV(chatID);
             if(infoNguoiDung == "") Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {chatID}-- Message: {message}");
             else Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {infoNguoiDung}-- Message: {message}");
@@ -238,8 +283,9 @@ namespace Bot_Telegram_Ver3
             {
                 if (run == 0)
                 {
-                    ThemDuLieu(chatID, message);
+                    string kq = ThemDuLieu(chatID, message);
                     modeThem = 0;
+                    bot.SendTextMessageAsync(chatID, kq, ParseMode.Html, replyMarkup: keyboard);
                 }
                 else bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
                 
@@ -248,50 +294,7 @@ namespace Bot_Telegram_Ver3
             {
                 string text = $"<b>Chào mừng bạn đến với XemTKB_VNUA</b>\n\n" +
                               $"Hãy chọn chức năng <b>Bên Dưới</b> để sử dụng!";
-                var keyboard = new ReplyKeyboardMarkup(
-                    new[]
-                    {
-                        new[]
-                        {
-                        themDuLieu
-                        },
-
-                        new[]
-                        {
-                            thoiKhoaBieu,
-                            thoiKhoaBieuMai
-                        },
-
-                        new[]
-                        {
-                            lichHocTuanNay,
-                            lichHocTuanSau
-                        },
-
-                        new[]
-                        {
-                            diemHKTruoc,
-                            diemHKNay
-                        },
-
-                        new[]
-                        {
-                            lichThi,
-                            thoiGianBieu
-                        },
-
-                        new[]
-                        {
-                            batThongBao,
-                            tatThongBao
-                        },
-
-                        new[]
-                        {
-                            xoaDuLieu,
-                        },
-                    }
-                );
+                
                 bot.SendTextMessageAsync(chatID, text,ParseMode.Html, replyMarkup: keyboard);
             }
             else if (message == "Thời Gian Biểu VNUA")
@@ -359,26 +362,24 @@ namespace Bot_Telegram_Ver3
             }
         }
 
-        private static void ThemDuLieu(string chatID,string message)
+        private static string ThemDuLieu(string chatID,string message)
         {
             run = 1;
 
             string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
             if (kiemTraDuLieu == "")
             {
-                bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
-                return;
+                return $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!";
             }
             string maSV = message.Substring("".Length);
             if (long.TryParse(maSV, out long maSvValue) == false)
             {
-                bot.SendTextMessageAsync(chatID, "Vui lòng kiểm tra lại mã sinh viên!");
-                return;
+                return "Vui lòng kiểm tra lại mã sinh viên!";
             }
             bot.SendTextMessageAsync(chatID, "Đang lấy dữ liệu! Vui lòng chờ!");
             string kq = controller.ThemDuLieu(chatID, maSV);
             run = 0;
-            bot.SendTextMessageAsync(chatID, kq);
+            return kq;
         }
 
         private static void KiemTraThayDoi()
