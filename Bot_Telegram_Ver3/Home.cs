@@ -165,6 +165,7 @@ namespace Bot_Telegram_Ver3
                         },
                     }
                                 );
+            var removeKeyboard = new ReplyKeyboardRemove();
 
             string infoNguoiDung = controller.ThongTinSV(chatID);
             if(infoNguoiDung == "") Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {chatID}-- Message: {message}");
@@ -276,7 +277,7 @@ namespace Bot_Telegram_Ver3
                     bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
                     return;
                 }
-                bot.SendTextMessageAsync(chatID, "Nhập Mã Sinh Viên của Bạn\n<b>Ví dụ:</b> 6655010", ParseMode.Html);
+                bot.SendTextMessageAsync(chatID, "Nhập Mã Sinh Viên của Bạn\n<b>Ví dụ:</b> 6655010", ParseMode.Html,replyMarkup: removeKeyboard);
                 modeThem = 1;
             }
             else if (message != "" && modeThem != 0)
