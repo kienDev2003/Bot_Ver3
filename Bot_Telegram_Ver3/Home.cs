@@ -344,7 +344,15 @@ namespace Bot_Telegram_Ver3
                     return;
                 }
                 bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
-                Task.Run(() => XemDiem(chatID, 1));
+                if(run == 0)
+                {
+                    XemDiem(chatID, 1);
+                }
+                else
+                {
+                    bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                }    
+
             }
             else if (message == "Điểm Học Kỳ Này")
             {
@@ -355,7 +363,14 @@ namespace Bot_Telegram_Ver3
                     return;
                 }
                 bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
-                Task.Run(() => XemDiem(chatID, 0));
+                if (run == 0)
+                {
+                    XemDiem(chatID, 0);
+                }
+                else
+                {
+                    bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                }
             }
             else
             {
@@ -392,8 +407,10 @@ namespace Bot_Telegram_Ver3
 
         private static void XemDiem(string chatID,int mode)
         {
+            run = 1;
             string diem = controller.GuiDiem(chatID, mode);
             bot.SendTextMessageAsync(chatID, diem, ParseMode.Html);
+            run = 0;
         }
     }
 }
