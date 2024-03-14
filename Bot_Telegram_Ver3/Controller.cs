@@ -644,19 +644,19 @@ namespace Bot_Telegram_Ver3
 
                 if (tkb && lt)
                 {
-                    Console.WriteLine($"DL__{_chatID}");
+                    Console.WriteLine($"DL__{ThongTinSV(_chatID)}__{DateTime.Now.ToString("dd/MM/yyyy")}");
                     bot.SendTextMessageAsync(_chatID, $"<b>DỮ LIỆU</b> của bạn có sự thay đổi\n" +
                                                            $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
                 else if (lt)
                 {
-                    Console.WriteLine($"LT__{_chatID}");
+                    Console.WriteLine($"LT__{ThongTinSV(_chatID)}__{DateTime.Now.ToString("dd/MM/yyyy")}");
                     bot.SendTextMessageAsync(_chatID, $"<b>LỊCH THI</b> của bạn có sự thay đổi\n" +
                                                            $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
                 else if (tkb)
                 {
-                    Console.WriteLine($"TKB__{_chatID}");
+                    Console.WriteLine($"TKB__{ThongTinSV(_chatID)}__{DateTime.Now.ToString("dd/MM/yyyy")}");
                     bot.SendTextMessageAsync(_chatID, $"<b>THỜI KHÓA BIỂU</b> của bạn có sự thay đổi\n" +
                                                            $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
@@ -719,7 +719,7 @@ namespace Bot_Telegram_Ver3
 
             if (htmlLichThiNew == "") return false;
 
-            if (htmlLichThiNew != htmlLichThi)
+            if (!(htmlLichThi.Equals(htmlLichThiNew, StringComparison.OrdinalIgnoreCase)))
             {
                 return true;
             }
@@ -788,7 +788,7 @@ namespace Bot_Telegram_Ver3
             }
 
             if (htmlTkbNew == "") return false;
-            if (htmlTkbNew != htmlTkb)
+            if (!(htmlTkbNew.Equals(htmlTkb, StringComparison.OrdinalIgnoreCase)))
             {
                 return true;
             }
