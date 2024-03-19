@@ -25,8 +25,8 @@ namespace Bot_Telegram_Ver3
         private static string tokenBot = ConfigurationManager.AppSettings["tokenBot"].ToString();
         private static TelegramBotClient bot = null;
 
-        static Timer timer20H = new Timer();
-        static Timer timer20H45 = new Timer();
+        static Timer timer21H30 = new Timer();
+        static Timer timer23H = new Timer();
 
         private static int run = 0;
         private static int modeThem = 0;
@@ -44,63 +44,68 @@ namespace Bot_Telegram_Ver3
             bot.OnMessage += Bot_OnMessage;
 
             SetupTimer23H_PM();
-            SetupTimer20H_PM();
+            SetupTimer21H30_PM();
 
             Console.ReadLine();
         }
         static void SetupTimer23H_PM()
         {
             DateTime now = DateTime.Now;
-            DateTime scheduledTime = new DateTime(now.Year, now.Month, now.Day, 23, 55, 00);
-            scheduledTime = (now > scheduledTime) ? scheduledTime.AddDays(1) : scheduledTime;
+            DateTime scheduledTime = new DateTime(now.Year, now.Month, now.Day, 23, 00, 00);
 
-            TimeSpan timeUntilNextRun = scheduledTime - now;
+            if (now > scheduledTime)
+            {
+                scheduledTime = scheduledTime.AddDays(1);
+            }
 
-            timer20H = new Timer(timeUntilNextRun.TotalMilliseconds);
-            timer20H.Elapsed += (sender, e) => KiemTraThayDoi(sender, e, scheduledTime);
-            timer20H.AutoReset = false;
-            timer20H.Start();
+            double interval = (scheduledTime - now).TotalMilliseconds;
+
+            timer23H = new Timer(interval);
+            timer23H.Elapsed += (sender, e) => KiemTraThayDoi(sender, e, scheduledTime);
+            timer23H.Start();
         }
 
-        static void SetupTimer20H_PM()
+        static void SetupTimer21H30_PM()
         {
             DateTime now = DateTime.Now;
-            DateTime scheduledTime = new DateTime(now.Year, now.Month, now.Day, 20, 45, 00);
-            scheduledTime = (now > scheduledTime) ? scheduledTime.AddDays(1) : scheduledTime;
+            DateTime scheduledTime = new DateTime(now.Year, now.Month, now.Day, 21, 35, 00);
 
-            TimeSpan timeUntilNextRun = scheduledTime - now;
+            if (now > scheduledTime)
+            {
+                scheduledTime = scheduledTime.AddDays(1);
+            }
 
-            timer20H45 = new Timer(timeUntilNextRun.TotalMilliseconds);
-            timer20H45.Elapsed += (sender, e) => GuiTKBVaLichThi(sender, e, scheduledTime);
-            timer20H45.AutoReset = false;
-            timer20H45.Start();
+            double interval = (scheduledTime - now).TotalMilliseconds;
+
+            timer21H30 = new Timer(interval);
+            timer21H30.Elapsed += (sender, e) => GuiTKBVaLichThi(sender, e, scheduledTime);
+            timer21H30.Start();
         }
 
         private static void KiemTraThayDoi(object sender, ElapsedEventArgs e, DateTime scheduledTime)
         {
-            // Kiểm tra thời gian dự kiến
-            if (DateTime.Now > scheduledTime)
-            {
-                // Thực hiện các hành động cần thiết
-                Task.Run(() => controller.KiemTraThayDoi(bot));
+            ((Timer)sender).Stop();
 
-                // Thiết lập Timer cho sự kiện tiếp theo
-                SetupTimer23H_PM();
-            }
+            // Thực hiện các hành động cần thiết
+            Task.Run(() => controller.KiemTraThayDoi(bot));
+
+            // Thiết lập Timer cho sự kiện tiếp theo
+            ((Timer)sender).Interval = TimeSpan.FromDays(1).TotalMilliseconds;
+            ((Timer)sender).Start();
         }
 
-        private static void GuiTKBVaLichThi(object sender,ElapsedEventArgs e, DateTime scheduledTime)
+        private static void GuiTKBVaLichThi(object sender, ElapsedEventArgs e, DateTime scheduledTime)
         {
-            // Kiểm tra thời gian dự kiến
-            if (DateTime.Now > scheduledTime)
-            {
-                // Thực hiện các hành động cần thiết
-                controller.GuiLichThiAuto(bot);
-                controller.GuiTKBAuto(bot);
+            ((Timer)sender).Stop();
 
-                // Thiết lập Timer cho sự kiện tiếp theo
-                SetupTimer20H_PM();
-            }
+            // Thực hiện các hành động cần thiết
+            controller.GuiLichThiAuto(bot);
+            controller.GuiTKBAuto(bot);
+
+            // Thiết lập Timer cho sự kiện tiếp theo
+            ((Timer)sender).Interval = TimeSpan.FromDays(1).TotalMilliseconds;
+            ((Timer)sender).Start();
+
         }
 
         private static void Bot_OnMessage(object sender, MessageEventArgs e)
@@ -168,15 +173,15 @@ namespace Bot_Telegram_Ver3
             var removeKeyboard = new ReplyKeyboardRemove();
 
             string infoNguoiDung = controller.ThongTinSV(chatID);
-            if(infoNguoiDung == "") Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {chatID}-- Message: {message}");
+            if (infoNguoiDung == "") Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {chatID}-- Message: {message}");
             else Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {infoNguoiDung}-- Message: {message}");
 
             if (message == "Thời Khóa Biểu Hôm Nay")
             {
                 string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if(kiemTraDuLieu != "")
+                if (kiemTraDuLieu != "")
                 {
-                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu,ParseMode.Html);
+                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                     return;
                 }
                 DateTime date = DateTime.Now;
@@ -277,7 +282,7 @@ namespace Bot_Telegram_Ver3
                     bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
                     return;
                 }
-                bot.SendTextMessageAsync(chatID, "Nhập Mã Sinh Viên của Bạn\n<b>Ví dụ:</b> 6655010", ParseMode.Html,replyMarkup: removeKeyboard);
+                bot.SendTextMessageAsync(chatID, "Nhập Mã Sinh Viên của Bạn\n<b>Ví dụ:</b> 6655010", ParseMode.Html, replyMarkup: removeKeyboard);
                 modeThem = 1;
             }
             else if (message != "" && modeThem != 0)
@@ -289,14 +294,14 @@ namespace Bot_Telegram_Ver3
                     bot.SendTextMessageAsync(chatID, kq, ParseMode.Html, replyMarkup: keyboard);
                 }
                 else bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
-                
+
             }
             else if (message == "/start")
             {
                 string text = $"<b>Chào mừng bạn đến với XemTKB_VNUA</b>\n\n" +
                               $"Hãy chọn chức năng <b>Bên Dưới</b> để sử dụng!";
-                
-                bot.SendTextMessageAsync(chatID, text,ParseMode.Html, replyMarkup: keyboard);
+
+                bot.SendTextMessageAsync(chatID, text, ParseMode.Html, replyMarkup: keyboard);
             }
             else if (message == "Thời Gian Biểu VNUA")
             {
@@ -315,15 +320,15 @@ namespace Bot_Telegram_Ver3
                 string text = message.Substring(spaceIndex + 1);
                 bot.SendTextMessageAsync(_chatID, text, ParseMode.Html);
             }
-            else if(message == "Bật Thông Báo")
+            else if (message == "Bật Thông Báo")
             {
                 int kq = controller.SetThongBao(1, chatID);
                 if (kq > 0)
                 {
-                    bot.SendTextMessageAsync(chatID, "Bật thông báo <b>Thành công</b>",ParseMode.Html);
+                    bot.SendTextMessageAsync(chatID, "Bật thông báo <b>Thành công</b>", ParseMode.Html);
                 }
             }
-            else if(message == "Tắt Thông Báo")
+            else if (message == "Tắt Thông Báo")
             {
                 int kq = controller.SetThongBao(0, chatID);
                 if (kq > 0)
@@ -331,9 +336,9 @@ namespace Bot_Telegram_Ver3
                     bot.SendTextMessageAsync(chatID, "Tắt thông báo <b>Thành công</b>", ParseMode.Html);
                 }
             }
-            else if(message == "/kt")
+            else if (message == "/kt")
             {
-                Task.Run(() => KiemTraThayDoi()) ;
+                Task.Run(() => KiemTraThayDoi());
             }
             else if (message == "Điểm Học Kỳ Trước")
             {
@@ -344,14 +349,14 @@ namespace Bot_Telegram_Ver3
                     return;
                 }
                 bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
-                if(run == 0)
+                if (run == 0)
                 {
                     XemDiem(chatID, 1);
                 }
                 else
                 {
                     bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
-                }    
+                }
 
             }
             else if (message == "Điểm Học Kỳ Này")
@@ -359,7 +364,7 @@ namespace Bot_Telegram_Ver3
                 string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                 if (kiemTraDuLieu != "")
                 {
-                    bot.SendTextMessageAsync(chatID,kiemTraDuLieu, ParseMode.Html);
+                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                     return;
                 }
                 bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
@@ -378,7 +383,7 @@ namespace Bot_Telegram_Ver3
             }
         }
 
-        private static string ThemDuLieu(string chatID,string message)
+        private static string ThemDuLieu(string chatID, string message)
         {
             run = 1;
 
@@ -405,7 +410,7 @@ namespace Bot_Telegram_Ver3
             run = 0;
         }
 
-        private static void XemDiem(string chatID,int mode)
+        private static void XemDiem(string chatID, int mode)
         {
             run = 1;
             string diem = controller.GuiDiem(chatID, mode);

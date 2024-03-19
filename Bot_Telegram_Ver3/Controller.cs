@@ -123,7 +123,7 @@ namespace Bot_Telegram_Ver3
                 var txtHocKy = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_txtChonHK"));
                 txtHocKy.SendKeys(hocKyXemDiem);
 
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
 
                 chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnChonHK")).Click();
 
@@ -214,7 +214,7 @@ namespace Bot_Telegram_Ver3
             }
             catch(Exception e)
             {
-                data = "WEB Trường đang bảo trì";
+                data = "WEB Trường đang bảo trì Hoặc Chưa đánh giá giảng dạy !";
                 return data;
             }
 
@@ -305,7 +305,7 @@ namespace Bot_Telegram_Ver3
             ChromeDriverService service = ChromeDriverService.CreateDefaultService();
             service.HideCommandPromptWindow = true;
             ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--headless");
+            //chromeOptions.AddArgument("--headless");
             var chromeDriver = new ChromeDriver(service, chromeOptions);
 
             bool themTKB = ThemDuLieuTKB(chromeDriver, chatId, maSv);
@@ -581,10 +581,10 @@ namespace Bot_Telegram_Ver3
                     var txtCapcha = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_txtCaptcha"));
                     txtCapcha.SendKeys(_capcha);
                     chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnXacNhan")).Click();
-                    Thread.Sleep(1000);
+                    Thread.Sleep(2000);
                     chromeDriver.Navigate().GoToUrl(urlTKB);
                 }
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
                 if (CheckAlert(chromeDriver))
                 {
                     IAlert alert = chromeDriver.SwitchTo().Alert();
@@ -592,12 +592,12 @@ namespace Bot_Telegram_Ver3
                 }
                 IWebElement element = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_rad_ThuTiet"));
                 element.Click();
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
 
                 IWebElement _selectHocKy = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_ddlChonNHHK"));
                 SelectElement select = new SelectElement(_selectHocKy);
                 select.SelectByValue(hocKy);
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
 
                 if (CheckAlert(chromeDriver))
                 {
@@ -633,11 +633,11 @@ namespace Bot_Telegram_Ver3
                 ChromeDriverService service = ChromeDriverService.CreateDefaultService();
                 service.HideCommandPromptWindow = true;
                 ChromeOptions chromeOptions = new ChromeOptions();
-                chromeOptions.AddArgument("--headless");
+                //chromeOptions.AddArgument("--headless");
                 IWebDriver chromeDriver = new ChromeDriver(service, chromeOptions);
 
                 bool tkb = KiemTraTkb(chromeDriver, maSV, _chatID, htmlTkbCu);
-                Thread.Sleep(3000);
+                Thread.Sleep(2000);
                 bool lt = KiemTraLichThi(chromeDriver, maSV, _chatID, htmlHtmlLt);
 
                 chromeDriver.Quit();
@@ -645,20 +645,20 @@ namespace Bot_Telegram_Ver3
                 if (tkb && lt)
                 {
                     Console.WriteLine($"DL__{ThongTinSV(_chatID)}__{DateTime.Now.ToString("dd/MM/yyyy")}");
-                    bot.SendTextMessageAsync(_chatID, $"<b>DỮ LIỆU</b> của bạn có sự thay đổi\n" +
-                                                           $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
+                    //bot.SendTextMessageAsync(_chatID, $"<b>DỮ LIỆU</b> của bạn có sự thay đổi\n" +
+                    //                                      $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
                 else if (lt)
                 {
                     Console.WriteLine($"LT__{ThongTinSV(_chatID)}__{DateTime.Now.ToString("dd/MM/yyyy")}");
-                    bot.SendTextMessageAsync(_chatID, $"<b>LỊCH THI</b> của bạn có sự thay đổi\n" +
-                                                           $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
+                    //bot.SendTextMessageAsync(_chatID, $"<b>LỊCH THI</b> của bạn có sự thay đổi\n" +
+                    //                                       $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
                 else if (tkb)
                 {
                     Console.WriteLine($"TKB__{ThongTinSV(_chatID)}__{DateTime.Now.ToString("dd/MM/yyyy")}");
-                    bot.SendTextMessageAsync(_chatID, $"<b>THỜI KHÓA BIỂU</b> của bạn có sự thay đổi\n" +
-                                                           $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
+                    //bot.SendTextMessageAsync(_chatID, $"<b>THỜI KHÓA BIỂU</b> của bạn có sự thay đổi\n" +
+                    //                                       $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
                 }
                 else continue;
             }
@@ -671,7 +671,7 @@ namespace Bot_Telegram_Ver3
             try
             {
                 chromeDriver.Navigate().GoToUrl(_urlLichThi);
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
                 if (CheckAlert(chromeDriver))
                 {
                     IAlert alert = chromeDriver.SwitchTo().Alert();
@@ -746,12 +746,12 @@ namespace Bot_Telegram_Ver3
                     string _capcha = capcha.InnerText.Trim();
                     var txtCapcha = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_txtCaptcha"));
                     txtCapcha.SendKeys(_capcha);
-                    Thread.Sleep(1000);
+                    Thread.Sleep(2000);
                     chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnXacNhan")).Click();
-                    Thread.Sleep(1000);
+                    Thread.Sleep(2000);
                     chromeDriver.Navigate().GoToUrl(urlTKB);
                 }
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
                 if (CheckAlert(chromeDriver))
                 {
                     IAlert alert = chromeDriver.SwitchTo().Alert();
@@ -759,12 +759,12 @@ namespace Bot_Telegram_Ver3
                 }
                 IWebElement element = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_rad_ThuTiet"));
                 element.Click();
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
 
                 IWebElement _selectHocKy = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_ddlChonNHHK"));
                 SelectElement select = new SelectElement(_selectHocKy);
                 select.SelectByValue(hocKy);
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
 
                 if (CheckAlert(chromeDriver))
                 {
