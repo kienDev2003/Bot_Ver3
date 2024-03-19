@@ -642,23 +642,11 @@ namespace Bot_Telegram_Ver3
 
                 chromeDriver.Quit();
 
-                if (tkb && lt)
+                if (tkb || lt)
                 {
-                    Console.WriteLine($"DL__{ThongTinSV(_chatID)}__{DateTime.Now.ToString("dd/MM/yyyy")}");
-                    //bot.SendTextMessageAsync(_chatID, $"<b>DỮ LIỆU</b> của bạn có sự thay đổi\n" +
-                    //                                      $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
-                }
-                else if (lt)
-                {
-                    Console.WriteLine($"LT__{ThongTinSV(_chatID)}__{DateTime.Now.ToString("dd/MM/yyyy")}");
-                    //bot.SendTextMessageAsync(_chatID, $"<b>LỊCH THI</b> của bạn có sự thay đổi\n" +
-                    //                                       $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
-                }
-                else if (tkb)
-                {
-                    Console.WriteLine($"TKB__{ThongTinSV(_chatID)}__{DateTime.Now.ToString("dd/MM/yyyy")}");
-                    //bot.SendTextMessageAsync(_chatID, $"<b>THỜI KHÓA BIỂU</b> của bạn có sự thay đổi\n" +
-                    //                                       $"Hãy thêm lại dữ liệu của bạn", ParseMode.Html);
+                    string text = $"<b>Dữ liệu</b> của bạn có sự <b>thay đổi</b>. Hãy <b>Xóa dữ liệu</b> và <b>Thêm dữ liệu mới</b> của bạn. Hãy làm điều trên để nắm bắt <b>Lịch Học,Lịch Thi</b> chính xác nhất !";
+                    bot.SendTextMessageAsync(_chatID, text, ParseMode.Html);
+                    Console.WriteLine($"{ThongTinSV(_chatID)}--Ngày kiểm tra: {DateTime.Now.ToString("dd-MM-yyyy")}");
                 }
                 else continue;
             }
