@@ -122,6 +122,7 @@ namespace Bot_Telegram_Ver3
             var diemHKNay = new KeyboardButton("Điểm Học Kỳ Này");
             var lichHocTuanNay = new KeyboardButton("Lịch Học Tuần Này");
             var lichHocTuanSau = new KeyboardButton("Lịch Học Tuần Sau");
+            var lichHoc3TuanSau = new KeyboardButton("Lịch Học 3 Tuần Sau");
             var thoiGianBieu = new KeyboardButton("Thời Gian Biểu VNUA");
             var batThongBao = new KeyboardButton("Bật Thông Báo");
             var tatThongBao = new KeyboardButton("Tắt Thông Báo");
@@ -162,6 +163,10 @@ namespace Bot_Telegram_Ver3
                         {
                             batThongBao,
                             tatThongBao
+                        },
+                        new[]
+                        {
+                            lichHoc3TuanSau,
                         },
 
                         new[]
@@ -376,6 +381,27 @@ namespace Bot_Telegram_Ver3
                 {
                     bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
                 }
+            }
+            else if(message == "Lịch Học 3 Tuần Sau")
+            {
+                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                if (kiemTraDuLieu != "")
+                {
+                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                    return;
+                }
+                DateTime date = DateTime.Now;
+                for(int i = 0;i < 3; i++)
+                {
+                    date = date.AddDays(7);
+
+                    string ngay = date.ToString("yyyy-MM-dd");
+                    string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
+
+                    string data = controller.GuiTKBTQTuan(1, chatID, ngay);
+                    bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+                }
+                
             }
             else
             {
