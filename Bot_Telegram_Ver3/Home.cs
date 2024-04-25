@@ -1,20 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using HtmlAgilityPack;
 using Telegram.Bot.Args;
 using Telegram.Bot;
 using System.Configuration;
-using System.Data.SQLite;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types;
 using System.Timers;
-using System.Runtime.Remoting.Messaging;
 using Telegram.Bot.Types.ReplyMarkups;
+using thread = System.Threading.Thread;
 
 namespace Bot_Telegram_Ver3
 {
@@ -181,84 +174,9 @@ namespace Bot_Telegram_Ver3
             if (infoNguoiDung == "") Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {chatID}-- Message: {message}");
             else Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {infoNguoiDung}-- Message: {message}");
 
-            if (message == "Thời Khóa Biểu Hôm Nay")
+            try
             {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu != "")
-                {
-                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
-                    return;
-                }
-                DateTime date = DateTime.Now;
-                string ngay = date.ToString("yyyy-MM-dd");
-                string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
-
-                string data = controller.GuiTKB(chatID, ngay, thu);
-                bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
-            }
-            else if (message == "Thời Khóa Biểu Ngày Mai")
-            {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu != "")
-                {
-                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
-                    return;
-                }
-                DateTime date = DateTime.Now.AddDays(1);
-                string ngay = date.ToString("yyyy-MM-dd");
-                string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
-
-                string data = controller.GuiTKB(chatID, ngay, thu);
-                bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
-            }
-            else if (message == "Lịch Học Tuần Này")
-            {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu != "")
-                {
-                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
-                    return;
-                }
-                DateTime date = DateTime.Now;
-                string ngay = date.ToString("yyyy-MM-dd");
-                string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
-
-                string data = controller.GuiTKBTQTuan(1, chatID, ngay);
-                bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
-            }
-            else if (message == "Lịch Học Tuần Sau")
-            {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu != "")
-                {
-                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
-                    return;
-                }
-                DateTime date = DateTime.Now;
-                string ngay = date.ToString("yyyy-MM-dd");
-                string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
-
-                string data = controller.GuiTKBTQTuan(2, chatID, ngay);
-                bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
-            }
-            else if (message == "Lịch Thi")
-            {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu != "")
-                {
-                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
-                    return;
-                }
-                DateTime date = DateTime.Now;
-                string ngay = date.ToString("yyyy-MM-dd");
-
-                string data = controller.GuiLichThi(chatID, ngay);
-                bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
-            }
-            else if (message == "Xóa Dữ Liệu")
-            {
-                int xoa = 0;
-                if (run == 0)
+                if (message == "Thời Khóa Biểu Hôm Nay")
                 {
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu != "")
@@ -266,144 +184,228 @@ namespace Bot_Telegram_Ver3
                         bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                         return;
                     }
-                    xoa = controller.XoaDuLieu(chatID);
-                }
-                else
-                {
-                    bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thực hiện lại sau 10 giây");
-                    return;
-                }
-                if (xoa > 0)
-                {
-                    bot.SendTextMessageAsync(chatID, "Xóa dữ liệu thành công");
-                }
-                else bot.SendTextMessageAsync(chatID, "Xóa dữ liệu KHÔNG thành công");
-            }
-            else if (message == "Thêm Dữ Liệu")
-            {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu == "")
-                {
-                    bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
-                    return;
-                }
-                bot.SendTextMessageAsync(chatID, "Nhập Mã Sinh Viên của Bạn\n<b>Ví dụ:</b> 6655010", ParseMode.Html, replyMarkup: removeKeyboard);
-                modeThem = 1;
-            }
-            else if (message != "" && modeThem != 0)
-            {
-                if (run == 0)
-                {
-                    string kq = ThemDuLieu(chatID, message);
-                    modeThem = 0;
-                    bot.SendTextMessageAsync(chatID, kq, ParseMode.Html, replyMarkup: keyboard);
-                }
-                else bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                    DateTime date = DateTime.Now;
+                    string ngay = date.ToString("yyyy-MM-dd");
+                    string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
 
-            }
-            else if (message == "/start")
-            {
-                string text = $"<b>Chào mừng bạn đến với XemTKB_VNUA</b>\n\n" +
-                              $"Hãy chọn chức năng <b>Bên Dưới</b> để sử dụng!";
+                    string data = controller.GuiTKB(chatID, ngay, thu);
+                    bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+                }
+                else if (message == "Thời Khóa Biểu Ngày Mai")
+                {
+                    string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                    if (kiemTraDuLieu != "")
+                    {
+                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        return;
+                    }
+                    DateTime date = DateTime.Now.AddDays(1);
+                    string ngay = date.ToString("yyyy-MM-dd");
+                    string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
 
-                bot.SendTextMessageAsync(chatID, text, ParseMode.Html, replyMarkup: keyboard);
-            }
-            else if (message == "Thời Gian Biểu VNUA")
-            {
-                string fileStream = ConfigurationManager.AppSettings["urlAnhTGB"].ToString();
-                bot.SendPhotoAsync(chatID, fileStream, "THỜI GIAN BIỂU VNUA");
-            }
-            else if (message.StartsWith("/tb "))
-            {
-                string text = message.Substring("/tb ".Length);
-                controller.GuiThongBao(bot, text);
-            }
-            else if (message.StartsWith("/tbid "))
-            {
-                int spaceIndex = message.IndexOf(' ', "/tbid ".Length);
-                string _chatID = message.Substring("/tbid ".Length, spaceIndex - "/tbid ".Length);
-                string text = message.Substring(spaceIndex + 1);
-                bot.SendTextMessageAsync(_chatID, text, ParseMode.Html);
-            }
-            else if (message == "Bật Thông Báo")
-            {
-                int kq = controller.SetThongBao(1, chatID);
-                if (kq > 0)
-                {
-                    bot.SendTextMessageAsync(chatID, "Bật thông báo <b>Thành công</b>", ParseMode.Html);
+                    string data = controller.GuiTKB(chatID, ngay, thu);
+                    bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
                 }
-            }
-            else if (message == "Tắt Thông Báo")
-            {
-                int kq = controller.SetThongBao(0, chatID);
-                if (kq > 0)
+                else if (message == "Lịch Học Tuần Này")
                 {
-                    bot.SendTextMessageAsync(chatID, "Tắt thông báo <b>Thành công</b>", ParseMode.Html);
-                }
-            }
-            else if (message == "/kt")
-            {
-                Task.Run(() => KiemTraThayDoi());
-            }
-            else if (message == "Điểm Học Kỳ Trước")
-            {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu != "")
-                {
-                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
-                    return;
-                }
-                bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
-                if (run == 0)
-                {
-                    XemDiem(chatID, 1);
-                }
-                else
-                {
-                    bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
-                }
-
-            }
-            else if (message == "Điểm Học Kỳ Này")
-            {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu != "")
-                {
-                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
-                    return;
-                }
-                bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
-                if (run == 0)
-                {
-                    XemDiem(chatID, 0);
-                }
-                else
-                {
-                    bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
-                }
-            }
-            else if(message == "Lịch Học 3 Tuần Sau")
-            {
-                string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
-                if (kiemTraDuLieu != "")
-                {
-                    bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
-                    return;
-                }
-                DateTime date = DateTime.Now;
-                for(int i = 0;i < 3; i++)
-                {
-                    date = date.AddDays(7);
-
+                    string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                    if (kiemTraDuLieu != "")
+                    {
+                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        return;
+                    }
+                    DateTime date = DateTime.Now;
                     string ngay = date.ToString("yyyy-MM-dd");
                     string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
 
                     string data = controller.GuiTKBTQTuan(1, chatID, ngay);
                     bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
                 }
-                
+                else if (message == "Lịch Học Tuần Sau")
+                {
+                    string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                    if (kiemTraDuLieu != "")
+                    {
+                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        return;
+                    }
+                    DateTime date = DateTime.Now;
+                    string ngay = date.ToString("yyyy-MM-dd");
+                    string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
+
+                    string data = controller.GuiTKBTQTuan(2, chatID, ngay);
+                    bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+                }
+                else if (message == "Lịch Thi")
+                {
+                    string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                    if (kiemTraDuLieu != "")
+                    {
+                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        return;
+                    }
+                    DateTime date = DateTime.Now;
+                    string ngay = date.ToString("yyyy-MM-dd");
+
+                    string data = controller.GuiLichThi(chatID, ngay);
+                    bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+                }
+                else if (message == "Xóa Dữ Liệu")
+                {
+                    int xoa = 0;
+                    if (run == 0)
+                    {
+                        string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                        if (kiemTraDuLieu != "")
+                        {
+                            bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                            return;
+                        }
+                        xoa = controller.XoaDuLieu(chatID);
+                    }
+                    else
+                    {
+                        bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thực hiện lại sau 10 giây");
+                        return;
+                    }
+                    if (xoa > 0)
+                    {
+                        bot.SendTextMessageAsync(chatID, "Xóa dữ liệu thành công");
+                    }
+                    else bot.SendTextMessageAsync(chatID, "Xóa dữ liệu KHÔNG thành công");
+                }
+                else if (message == "Thêm Dữ Liệu")
+                {
+                    string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                    if (kiemTraDuLieu == "")
+                    {
+                        bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
+                        return;
+                    }
+                    bot.SendTextMessageAsync(chatID, "Nhập Mã Sinh Viên của Bạn\n<b>Ví dụ:</b> 6655010", ParseMode.Html, replyMarkup: removeKeyboard);
+                    modeThem = 1;
+                }
+                else if (message != "" && modeThem != 0)
+                {
+                    if (run == 0)
+                    {
+                        string kq = ThemDuLieu(chatID, message);
+                        modeThem = 0;
+                        bot.SendTextMessageAsync(chatID, kq, ParseMode.Html, replyMarkup: keyboard);
+                    }
+                    else bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+
+                }
+                else if (message == "/start")
+                {
+                    string text = $"<b>Chào mừng bạn đến với XemTKB_VNUA</b>\n\n" +
+                                  $"Hãy chọn chức năng <b>Bên Dưới</b> để sử dụng!";
+
+                    bot.SendTextMessageAsync(chatID, text, ParseMode.Html, replyMarkup: keyboard);
+                }
+                else if (message == "Thời Gian Biểu VNUA")
+                {
+                    string fileStream = ConfigurationManager.AppSettings["urlAnhTGB"].ToString();
+                    bot.SendPhotoAsync(chatID, fileStream, "THỜI GIAN BIỂU VNUA");
+                }
+                else if (message.StartsWith("/tb "))
+                {
+                    string text = message.Substring("/tb ".Length);
+                    controller.GuiThongBao(bot, text);
+                }
+                else if (message.StartsWith("/tbid "))
+                {
+                    int spaceIndex = message.IndexOf(' ', "/tbid ".Length);
+                    string _chatID = message.Substring("/tbid ".Length, spaceIndex - "/tbid ".Length);
+                    string text = message.Substring(spaceIndex + 1);
+                    bot.SendTextMessageAsync(_chatID, text, ParseMode.Html);
+                }
+                else if (message == "Bật Thông Báo")
+                {
+                    int kq = controller.SetThongBao(1, chatID);
+                    if (kq > 0)
+                    {
+                        bot.SendTextMessageAsync(chatID, "Bật thông báo <b>Thành công</b>", ParseMode.Html);
+                    }
+                }
+                else if (message == "Tắt Thông Báo")
+                {
+                    int kq = controller.SetThongBao(0, chatID);
+                    if (kq > 0)
+                    {
+                        bot.SendTextMessageAsync(chatID, "Tắt thông báo <b>Thành công</b>", ParseMode.Html);
+                    }
+                }
+                else if (message == "/kt")
+                {
+                    Task.Run(() => KiemTraThayDoi());
+                }
+                else if (message == "Điểm Học Kỳ Trước")
+                {
+                    string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                    if (kiemTraDuLieu != "")
+                    {
+                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        return;
+                    }
+                    bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
+                    if (run == 0)
+                    {
+                        XemDiem(chatID, 1);
+                    }
+                    else
+                    {
+                        bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                    }
+
+                }
+                else if (message == "Điểm Học Kỳ Này")
+                {
+                    string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                    if (kiemTraDuLieu != "")
+                    {
+                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        return;
+                    }
+                    bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
+                    if (run == 0)
+                    {
+                        XemDiem(chatID, 0);
+                    }
+                    else
+                    {
+                        bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                    }
+                }
+                else if (message == "Lịch Học 3 Tuần Sau")
+                {
+                    string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                    if (kiemTraDuLieu != "")
+                    {
+                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        return;
+                    }
+                    DateTime date = DateTime.Now;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        date = date.AddDays(7);
+
+                        string ngay = date.ToString("yyyy-MM-dd");
+                        string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
+
+                        string data = controller.GuiTKBTQTuan(1, chatID, ngay);
+                        bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+
+                        thread.Sleep(800);
+                    }
+
+                }
+                else
+                {
+                    bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");
+                }
             }
-            else
+            catch (Exception ex)
             {
                 bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");
             }
@@ -416,11 +418,13 @@ namespace Bot_Telegram_Ver3
             string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
             if (kiemTraDuLieu == "")
             {
+                run = 0;
                 return $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!";
             }
             string maSV = message.Substring("".Length);
             if (long.TryParse(maSV, out long maSvValue) == false)
             {
+                run = 0;
                 return "Vui lòng kiểm tra lại mã sinh viên!";
             }
             bot.SendTextMessageAsync(chatID, "Đang lấy dữ liệu! Vui lòng chờ!");
