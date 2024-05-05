@@ -27,6 +27,7 @@ namespace Bot_Telegram_Ver3
         private string urlLt = ConfigurationManager.AppSettings["urlLichThi"].ToString();
         private static string hocKy = ConfigurationManager.AppSettings["hocKy"].ToString();
         private static string urlDiem = ConfigurationManager.AppSettings["urlDiem"].ToString();
+        private static string urlHocPhi = ConfigurationManager.AppSettings["urlHocPhi"].ToString();
         private char _hocKy = hocKy.Last();
 
         public string GuiTKB(string chatID, string ngay, string thu)
@@ -98,6 +99,73 @@ namespace Bot_Telegram_Ver3
             string ttsv = model.GetTTSV(queryTTSV);
 
             return $"{ttsv}\n\n<b>Có lịch thi kết thúc học phần:</b>\n\n{data}";
+        }
+
+        public string GuiHocPhi(string chatID)
+        {
+            string kq = "";
+
+            string query = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
+            string msv = model.GetMaSVKiemTra(query);
+
+            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+            service.HideCommandPromptWindow = true;
+            ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.AddArgument("--headless");
+            IWebDriver chromeDriver = new ChromeDriver(service, chromeOptions);
+
+            chromeDriver.Navigate().GoToUrl(urlHocPhi + msv);
+
+            string html = chromeDriver.PageSource;
+
+            HtmlAgilityPack.HtmlDocument htmlDocument = new HtmlAgilityPack.HtmlDocument();
+            htmlDocument.LoadHtml(html);
+
+            var div = htmlDocument.DocumentNode.Descendants("div").Where(_div => _div.Attributes.Contains("id") && _div.Attributes["id"].Value == "ctl00_ContentPlaceHolder1_ctl00_pnlTongKetHocPhiCacHocKy").FirstOrDefault();
+            var tbody = div.Descendants("tbody").FirstOrDefault();
+
+            var tr = tbody.Descendants("tr").ToArray();
+
+            string text = "";
+            string temp = "";
+            for (int i = 0; i < tr.Length; i++)
+            {
+                string tittle = "";
+                string content = "";
+
+                if (i == 0 || i == 4 || i == 8)
+                {
+                    tittle = tr[i].InnerText;
+                }
+                else
+                {
+                    content = tr[i].InnerText;
+                }
+                tittle = tittle.Trim().Replace("Thông tin học phí ", ""); 
+                content = content.Trim().Replace("&nbsp;",".").Replace("\r\n", "\n").Replace(" ", "").Replace("Họcphíhọckỳ:", "Tổng:   ").Replace("Nợhọcphíhọckỳcũ:", "Nợ kỳ cũ:   ").Replace("Sốtiềnđãnộp:", "Đã nộp:   ").Replace("Sốtiềncònnợ:", "Còn nợ:   ");
+
+                if (i == 0 || i == 4 || i == 8)
+                {
+                    text += $"<b>{tittle}</b>\n\n";
+                }
+                else
+                {
+                    temp += content + "\n";
+                    if (i == 3 || i == 7 || i == 11)
+                    {
+                        text += temp + "\n";
+                        temp = "";
+                    }
+                }
+            }
+
+            chromeDriver.Quit();
+
+            string queryTTSV = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
+            string ttsv = model.GetTTSV(queryTTSV);
+
+            kq = ttsv + "\n\n" + text;
+            return kq;
         }
 
         public string GuiDiem(string chatID, int mode)
@@ -212,13 +280,13 @@ namespace Bot_Telegram_Ver3
 
                 return data;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 data = "WEB Trường đang bảo trì Hoặc Chưa đánh giá giảng dạy !";
                 return data;
             }
 
-            
+
         }
 
         public void GuiLichThiAuto(TelegramBotClient bot)

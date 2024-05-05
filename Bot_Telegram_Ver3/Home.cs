@@ -119,6 +119,7 @@ namespace Bot_Telegram_Ver3
             var thoiGianBieu = new KeyboardButton("Thời Gian Biểu VNUA");
             var batThongBao = new KeyboardButton("Bật Thông Báo");
             var tatThongBao = new KeyboardButton("Tắt Thông Báo");
+            var hocPhi = new KeyboardButton("Học Phí");
 
             var keyboard = new ReplyKeyboardMarkup(
                                 new[]
@@ -160,6 +161,7 @@ namespace Bot_Telegram_Ver3
                         new[]
                         {
                             lichHoc3TuanSau,
+                            hocPhi
                         },
 
                         new[]
@@ -400,6 +402,25 @@ namespace Bot_Telegram_Ver3
                     }
 
                 }
+                else if(message == "Học Phí")
+                {
+                    string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
+                    if (kiemTraDuLieu != "")
+                    {
+                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        return;
+                    }
+                    bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
+                    if (run == 0)
+                    {
+                        string test = controller.GuiHocPhi(chatID);
+                        bot.SendTextMessageAsync(chatID, test, ParseMode.Html);
+                    }
+                    else
+                    {
+                        bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                    }
+                }
                 else
                 {
                     bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");
@@ -407,6 +428,7 @@ namespace Bot_Telegram_Ver3
             }
             catch (Exception ex)
             {
+                run = 0;
                 bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");
             }
         }
