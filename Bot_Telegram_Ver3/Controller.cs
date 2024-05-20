@@ -8,7 +8,9 @@ using System.Configuration;
 using System.Data.SQLite;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -141,8 +143,8 @@ namespace Bot_Telegram_Ver3
                 {
                     content = tr[i].InnerText;
                 }
-                tittle = tittle.Trim().Replace("Thông tin học phí ", ""); 
-                content = content.Trim().Replace("&nbsp;",".").Replace("\r\n", "\n").Replace(" ", "").Replace("Họcphíhọckỳ:", "Tổng:   ").Replace("Nợhọcphíhọckỳcũ:", "Nợ kỳ cũ:   ").Replace("Sốtiềnđãnộp:", "Đã nộp:   ").Replace("Sốtiềncònnợ:", "Còn nợ:   ");
+                tittle = tittle.Trim().Replace("Thông tin học phí ", "");
+                content = content.Trim().Replace("&nbsp;", ".").Replace("\r\n", "\n").Replace(" ", "").Replace("Họcphíhọckỳ:", "Tổng:   ").Replace("Nợhọcphíhọckỳcũ:", "Nợ kỳ cũ:   ").Replace("Sốtiềnđãnộp:", "Đã nộp:   ").Replace("Sốtiềncònnợ:", "Còn nợ:   ");
 
                 if (i == 0 || i == 4 || i == 8)
                 {
@@ -168,7 +170,7 @@ namespace Bot_Telegram_Ver3
             return kq;
         }
 
-        public string GuiDiem(string chatID, int mode)
+        public async Task<string> GuiDiem(string chatID, int mode)
         {
             string data = "";
             try
@@ -196,6 +198,7 @@ namespace Bot_Telegram_Ver3
                 chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnChonHK")).Click();
 
                 string htmlDiem = chromeDriver.PageSource;
+
 
                 HtmlDocument htmlDocument = new HtmlDocument();
                 htmlDocument.LoadHtml(htmlDiem);
@@ -276,8 +279,6 @@ namespace Bot_Telegram_Ver3
 
                 data = $"{ttsv}\n\n{textHocKy}\n\n{textDiem}{textDiemTK}";
 
-                chromeDriver.Quit();
-
                 return data;
             }
             catch (Exception e)
@@ -285,8 +286,6 @@ namespace Bot_Telegram_Ver3
                 data = "WEB Trường đang bảo trì Hoặc Chưa đánh giá giảng dạy !";
                 return data;
             }
-
-
         }
 
         public void GuiLichThiAuto(TelegramBotClient bot)
@@ -368,52 +367,42 @@ namespace Bot_Telegram_Ver3
             return model.Command(query);
         }
 
-        public string ThemDuLieu(string chatId, string maSv)
+        public async Task<string> ThemDuLieu(string chatId, string maSv)
         {
-            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
-            service.HideCommandPromptWindow = true;
-            ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--headless");
-            var chromeDriver = new ChromeDriver(service, chromeOptions);
-
-            bool themTKB = ThemDuLieuTKB(chromeDriver, chatId, maSv);
-            bool themLT = ThemDuLieuLT(chromeDriver, chatId, maSv);
+            bool themTKB = await ThemDuLieuTKB(chatId, maSv);
+            bool themLT = await ThemDuLieuLT(chatId, maSv);
 
             if (themTKB && themLT == false)
             {
                 string text = $"Thêm dữ liệu TKB thành công!\n" +
                               $"Chưa có lịch thi";
-                chromeDriver.Quit();
                 return text;
             }
             else if (themLT && themTKB == false)
             {
                 string text = $"Thêm dữ liệu TKB KHÔNG thành công!\n" +
                               $"Vui lòng kiểm tra lại MSV / WEB trường đang bảo trì!";
-                chromeDriver.Quit();
                 return text;
             }
             else if (themTKB && themLT)
             {
                 string text = $"Thêm dữ liệu thành công";
-                chromeDriver.Quit();
                 return text;
             }
             else
             {
                 string text = $"Thêm dữ liệu TKB KHÔNG thành công!\n" +
                               $"Vui lòng kiểm tra lại MSV / WEB trường đang bảo trì!";
-                chromeDriver.Quit();
                 return text;
             }
         }
 
-        private bool ThemDuLieuLT(ChromeDriver chromeDriver, string chatId, string maSv)
+        private async Task<bool> ThemDuLieuLT(string chatId, string maSv)
         {
             try
             {
                 string urlLT = urlLt + maSv;
-                string html = LayHtmlLichThi(chromeDriver, maSv, urlLT, hocKy);
+                string html = await LayHtmlLichThi(maSv, urlLT, hocKy);
                 if (html == "") return false;
                 if (PhanTichDuLieuVaThemVaoCSDL_LT(html, chatId, maSv) == false) return false;
 
@@ -469,19 +458,20 @@ namespace Bot_Telegram_Ver3
             int check = model.CommandModeKiemTra(query, "", v);
         }
 
-        private string LayHtmlLichThi(ChromeDriver chromeDriver, string maSv, string urlLT, string hocKy)
+        private async Task<string> LayHtmlLichThi(string maSv, string urlLT, string hocKy)
         {
             try
             {
-                chromeDriver.Navigate().GoToUrl(urlLT);
-
-                if (CheckAlert(chromeDriver))
+                string htmlLichThi = "";
+                using (HttpClient client = new HttpClient())
                 {
-                    IAlert alert = chromeDriver.SwitchTo().Alert();
-                    alert.Accept();
-                }
+                    // Gửi yêu cầu GET để lấy trang
+                    HttpResponseMessage response = await client.GetAsync(urlLT); // Sử dụng await
+                    response.EnsureSuccessStatusCode();
+                    string responseBody = await response.Content.ReadAsStringAsync(); // Sử dụng await
+                    htmlLichThi = responseBody;
 
-                string htmlLichThi = chromeDriver.PageSource;
+                }
                 return htmlLichThi;
 
             }
@@ -491,12 +481,12 @@ namespace Bot_Telegram_Ver3
             }
         }
 
-        private bool ThemDuLieuTKB(ChromeDriver chromeDriver, string chatId, string maSv)
+        private async Task<bool> ThemDuLieuTKB(string chatId, string maSv)
         {
             try
             {
                 string urlTKB = urlTkb + maSv;
-                string html = LayHtmlTKB(chromeDriver, maSv, urlTKB, hocKy);
+                string html = await LayHtmlTKB(maSv, urlTKB, hocKy);
                 if (html == "") return false;
                 if (PhanTichDuLieuVaThemVaoCSDL_TKB(html, chatId, maSv) == false) return false;
 
@@ -629,52 +619,28 @@ namespace Bot_Telegram_Ver3
             int check = model.CommandModeKiemTra(query, v, "");
         }
 
-        private string LayHtmlTKB(ChromeDriver chromeDriver, string maSv, string urlTKB, string hocKy)
+        private async Task<string> LayHtmlTKB(string maSv, string urlTKB, string hocKy)
         {
-            string html;
+            string html = "";
             string htmlAll = "";
             try
             {
-
-                chromeDriver.Navigate().GoToUrl(urlTKB);
-                htmlAll = chromeDriver.PageSource;
-
-                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-                doc.LoadHtml(htmlAll);
-
-                var capcha = doc.DocumentNode.Descendants("span").Where(span => span.Attributes.Contains("id") && span.Attributes["id"].Value == "ctl00_ContentPlaceHolder1_ctl00_lblCapcha").FirstOrDefault();
-                if (capcha != null)
+                using (HttpClient client = new HttpClient())
                 {
-                    string _capcha = capcha.InnerText.Trim();
-                    var txtCapcha = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_txtCaptcha"));
-                    txtCapcha.SendKeys(_capcha);
-                    chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnXacNhan")).Click();
-                    Thread.Sleep(2000);
-                    chromeDriver.Navigate().GoToUrl(urlTKB);
+                    // Gửi yêu cầu GET để lấy trang
+                    HttpResponseMessage response = await client.GetAsync(urlTKB); // Sử dụng await
+                    response.EnsureSuccessStatusCode();
+                    string responseBody = await response.Content.ReadAsStringAsync(); // Sử dụng await
+
+                    // Sử dụng HtmlAgilityPack để lấy giá trị của __VIEWSTATE
+                    var htmlDoc = new HtmlDocument();
+                    htmlDoc.LoadHtml(responseBody);
+                    var viewStateNode = htmlDoc.DocumentNode.SelectSingleNode("//input[@name='__VIEWSTATE']");
+                    string viewState = viewStateNode.GetAttributeValue("value", "");
+
+                    // Gửi yêu cầu POST với giá trị __VIEWSTATE đã lấy được
+                    html = await SendPostRequest(viewState, urlTKB, "ThemDuLieu"); // Sử dụng await
                 }
-                Thread.Sleep(2000);
-                if (CheckAlert(chromeDriver))
-                {
-                    IAlert alert = chromeDriver.SwitchTo().Alert();
-                    alert.Accept();
-                }
-                IWebElement element = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_rad_ThuTiet"));
-                element.Click();
-                Thread.Sleep(2000);
-
-                IWebElement _selectHocKy = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_ddlChonNHHK"));
-                SelectElement select = new SelectElement(_selectHocKy);
-                select.SelectByValue(hocKy);
-                Thread.Sleep(2000);
-
-                if (CheckAlert(chromeDriver))
-                {
-                    IAlert alert = chromeDriver.SwitchTo().Alert();
-                    alert.Accept();
-                }
-
-                html = chromeDriver.PageSource;
-
                 return html;
 
             }
@@ -968,6 +934,48 @@ namespace Bot_Telegram_Ver3
                 default:
                     return string.Empty;
             }
+        }
+
+        static async Task<string> SendPostRequest(string viewState, string url, string mode)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                FormUrlEncodedContent formData = null;
+
+                if (mode == "XemDiem")
+                {
+                    formData = new FormUrlEncodedContent(new[]
+                    {
+                    new KeyValuePair<string, string>("__EVENTTARGET", "ctl00$ContentPlaceHolder1$ctl00$btnChonHK"),
+                    new KeyValuePair<string, string>("__EVENTARGUMENT", ""),
+                    new KeyValuePair<string, string>("__VIEWSTATE", viewState),
+                    new KeyValuePair<string, string>("__VIEWSTATEGENERATOR", "CA0B0334"),
+                    new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$txtChonHK", hocKy),
+                    new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$btnChonHK", "Xem"),
+                });
+                }
+                else
+                {
+                    formData = new FormUrlEncodedContent(new[]
+                    {
+                    new KeyValuePair<string, string>("__EVENTTARGET", "ctl00$ContentPlaceHolder1$ctl00$rad_ThuTiet"),
+                    new KeyValuePair<string, string>("__EVENTARGUMENT", ""),
+                    new KeyValuePair<string, string>("__LASTFOCUS", ""),
+                    new KeyValuePair<string, string>("__VIEWSTATE", viewState),
+                    new KeyValuePair<string, string>("__EVENTVALIDATION", ""),
+                    new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$ddlChonNHHK", hocKy),
+                    new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$rad_ThuTiet", "rad_ThuTiet"),
+                });
+
+                }
+
+                HttpResponseMessage response = await client.PostAsync(url, formData);
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = await response.Content.ReadAsStringAsync();
+                return responseBody;
+            }
+
         }
     }
 }

@@ -101,7 +101,7 @@ namespace Bot_Telegram_Ver3
 
         }
 
-        private static void Bot_OnMessage(object sender, MessageEventArgs e)
+        private static async void Bot_OnMessage(object sender, MessageEventArgs e)
         {
             string message = e.Message.Text;
             string chatID = e.Message.Chat.Id.ToString();
@@ -291,7 +291,7 @@ namespace Bot_Telegram_Ver3
                 {
                     if (run == 0)
                     {
-                        string kq = ThemDuLieu(chatID, message);
+                        string kq = await ThemDuLieu(chatID, message);
                         modeThem = 0;
                         bot.SendTextMessageAsync(chatID, kq, ParseMode.Html, replyMarkup: keyboard);
                     }
@@ -433,7 +433,7 @@ namespace Bot_Telegram_Ver3
             }
         }
 
-        private static string ThemDuLieu(string chatID, string message)
+        private static async Task<string> ThemDuLieu(string chatID, string message)
         {
             run = 1;
 
@@ -450,7 +450,7 @@ namespace Bot_Telegram_Ver3
                 return "Vui lòng kiểm tra lại mã sinh viên!";
             }
             bot.SendTextMessageAsync(chatID, "Đang lấy dữ liệu! Vui lòng chờ!");
-            string kq = controller.ThemDuLieu(chatID, maSV);
+            string kq = await controller.ThemDuLieu(chatID, maSV);
             run = 0;
             return kq;
         }
@@ -462,10 +462,10 @@ namespace Bot_Telegram_Ver3
             run = 0;
         }
 
-        private static void XemDiem(string chatID, int mode)
+        private static async void XemDiem(string chatID, int mode)
         {
             run = 1;
-            string diem = controller.GuiDiem(chatID, mode);
+            string diem = await controller.GuiDiem(chatID, mode);
             bot.SendTextMessageAsync(chatID, diem, ParseMode.Html);
             run = 0;
         }
