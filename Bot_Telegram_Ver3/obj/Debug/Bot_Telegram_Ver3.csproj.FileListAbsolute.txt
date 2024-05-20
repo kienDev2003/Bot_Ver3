@@ -34,10 +34,6 @@ E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.csproj.Cor
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Tele.A68DFD98.Up2Date
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.exe
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.pdb
-C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.csproj.AssemblyReference.cache
-C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.csproj.CoreCompileInputs.cache
-C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.exe
-C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.pdb
 C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\selenium-manager\linux\selenium-manager
 C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\selenium-manager\macos\selenium-manager
 C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\selenium-manager\windows\selenium-manager.exe
@@ -69,4 +65,8 @@ C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\System.Threadi
 C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\Telegram.Bot.xml
 C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\WebDriver.xml
 C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\WebDriver.Support.xml
+C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.csproj.AssemblyReference.cache
+C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.csproj.CoreCompileInputs.cache
 C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Tele.A68DFD98.Up2Date
+C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.exe
+C:\Users\Huyen Thanh\Desktop\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.pdb

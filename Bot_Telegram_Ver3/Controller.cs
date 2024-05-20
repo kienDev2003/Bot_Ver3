@@ -650,7 +650,7 @@ namespace Bot_Telegram_Ver3
             }
         }
 
-        public void KiemTraThayDoi(TelegramBotClient bot)
+        public async void KiemTraThayDoi(TelegramBotClient bot)
         {
             string[] chatID = model.ListNguoiBatAuto(1);
             if (chatID == null) return;
@@ -664,17 +664,8 @@ namespace Bot_Telegram_Ver3
                 string htmlHtmlLt = model.GetChuoiHtmlLt(query);
                 string maSV = model.GetMaSVKiemTra(query);
 
-                ChromeDriverService service = ChromeDriverService.CreateDefaultService();
-                service.HideCommandPromptWindow = true;
-                ChromeOptions chromeOptions = new ChromeOptions();
-                chromeOptions.AddArgument("--headless");
-                IWebDriver chromeDriver = new ChromeDriver(service, chromeOptions);
-
-                bool tkb = KiemTraTkb(chromeDriver, maSV, _chatID, htmlTkbCu);
-                Thread.Sleep(2000);
-                bool lt = KiemTraLichThi(chromeDriver, maSV, _chatID, htmlHtmlLt);
-
-                chromeDriver.Quit();
+                bool tkb = await KiemTraTkb(maSV, _chatID, htmlTkbCu);
+                bool lt = await KiemTraLichThi(maSV, _chatID, htmlHtmlLt);
 
                 if (tkb || lt)
                 {
@@ -686,21 +677,15 @@ namespace Bot_Telegram_Ver3
             }
         }
 
-        private bool KiemTraLichThi(IWebDriver chromeDriver, string maSV, string chatID, string htmlLichThi)
+        private async Task<bool> KiemTraLichThi(string maSV, string chatID, string htmlLichThi)
         {
             string _urlLichThi = urlLt + maSV;
             string htmlLichThiNew;
             try
             {
-                chromeDriver.Navigate().GoToUrl(_urlLichThi);
-                Thread.Sleep(2000);
-                if (CheckAlert(chromeDriver))
-                {
-                    IAlert alert = chromeDriver.SwitchTo().Alert();
-                    alert.Accept();
-                }
+                
 
-                string htmlAll = chromeDriver.PageSource;
+                string htmlAll = await LayHtmlLichThi(maSV, _urlLichThi, hocKy);
 
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(htmlAll);
@@ -748,53 +733,15 @@ namespace Bot_Telegram_Ver3
             return false;
         }
 
-        private bool KiemTraTkb(IWebDriver chromeDriver, string maSV, string chatID, string htmlTkb)
+        private async Task<bool> KiemTraTkb(string maSV, string chatID, string htmlTkb)
         {
             string htmlTkbNew = "";
             try
             {
                 string urlTKB = urlTkb + maSV;
                 string html;
-
-                chromeDriver.Navigate().GoToUrl(urlTKB);
-                string htmlAll = chromeDriver.PageSource;
-
-                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-                doc.LoadHtml(htmlAll);
-
-                var capcha = doc.DocumentNode.Descendants("span").Where(span => span.Attributes.Contains("id") && span.Attributes["id"].Value == "ctl00_ContentPlaceHolder1_ctl00_lblCapcha").FirstOrDefault();
-                if (capcha != null)
-                {
-                    string _capcha = capcha.InnerText.Trim();
-                    var txtCapcha = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_txtCaptcha"));
-                    txtCapcha.SendKeys(_capcha);
-                    Thread.Sleep(2000);
-                    chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnXacNhan")).Click();
-                    Thread.Sleep(2000);
-                    chromeDriver.Navigate().GoToUrl(urlTKB);
-                }
-                Thread.Sleep(2000);
-                if (CheckAlert(chromeDriver))
-                {
-                    IAlert alert = chromeDriver.SwitchTo().Alert();
-                    alert.Accept();
-                }
-                IWebElement element = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_rad_ThuTiet"));
-                element.Click();
-                Thread.Sleep(2000);
-
-                IWebElement _selectHocKy = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_ddlChonNHHK"));
-                SelectElement select = new SelectElement(_selectHocKy);
-                select.SelectByValue(hocKy);
-                Thread.Sleep(2000);
-
-                if (CheckAlert(chromeDriver))
-                {
-                    IAlert alert = chromeDriver.SwitchTo().Alert();
-                    alert.Accept();
-                }
-
-                html = chromeDriver.PageSource;
+                
+                html = await LayHtmlTKB(maSV, urlTKB, hocKy);
 
                 HtmlAgilityPack.HtmlDocument document = new HtmlAgilityPack.HtmlDocument();
                 document.LoadHtml(html);
