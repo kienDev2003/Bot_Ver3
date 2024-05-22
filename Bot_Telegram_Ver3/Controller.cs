@@ -8,6 +8,7 @@ using System.Configuration;
 using System.Data.SQLite;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
@@ -103,30 +104,30 @@ namespace Bot_Telegram_Ver3
             return $"{ttsv}\n\n<b>Có lịch thi kết thúc học phần:</b>\n\n{data}";
         }
 
-        public string GuiHocPhi(string chatID)
+        public async Task<string> GuiHocPhi(string chatID)
         {
             string kq = "";
 
             string query = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
             string msv = model.GetMaSVKiemTra(query);
 
-            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
-            service.HideCommandPromptWindow = true;
-            ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--headless");
-            IWebDriver chromeDriver = new ChromeDriver(service, chromeOptions);
+            string url = urlHocPhi + msv;
+            string html = "";
+            using (HttpClient client = new HttpClient())
+            {
+                // Gửi yêu cầu GET để lấy trang
+                HttpResponseMessage response = await client.GetAsync(url); // Sử dụng await
+                response.EnsureSuccessStatusCode();
+                string responseBody = await response.Content.ReadAsStringAsync(); // Sử dụng await
 
-            chromeDriver.Navigate().GoToUrl(urlHocPhi + msv);
-
-            string html = chromeDriver.PageSource;
+                html = responseBody;
+            }
 
             HtmlAgilityPack.HtmlDocument htmlDocument = new HtmlAgilityPack.HtmlDocument();
             htmlDocument.LoadHtml(html);
 
             var div = htmlDocument.DocumentNode.Descendants("div").Where(_div => _div.Attributes.Contains("id") && _div.Attributes["id"].Value == "ctl00_ContentPlaceHolder1_ctl00_pnlTongKetHocPhiCacHocKy").FirstOrDefault();
-            var tbody = div.Descendants("tbody").FirstOrDefault();
-
-            var tr = tbody.Descendants("tr").ToArray();
+            var tr = div.Descendants("tr").ToArray();
 
             string text = "";
             string temp = "";
@@ -144,7 +145,7 @@ namespace Bot_Telegram_Ver3
                     content = tr[i].InnerText;
                 }
                 tittle = tittle.Trim().Replace("Thông tin học phí ", "");
-                content = content.Trim().Replace("&nbsp;", ".").Replace("\r\n", "\n").Replace(" ", "").Replace("Họcphíhọckỳ:", "Tổng:   ").Replace("Nợhọcphíhọckỳcũ:", "Nợ kỳ cũ:   ").Replace("Sốtiềnđãnộp:", "Đã nộp:   ").Replace("Sốtiềncònnợ:", "Còn nợ:   ");
+                content = content.Trim().Replace("\r\n", "\n").Replace(" ", "").Replace("Họcphíhọckỳ:", "Tổng:   ").Replace("Nợhọcphíhọckỳcũ:", "Nợ kỳ cũ:   ").Replace("Sốtiềnđãnộp:", "Đã nộp:   ").Replace("Sốtiềncònnợ:", "Còn nợ:   ");
 
                 if (i == 0 || i == 4 || i == 8)
                 {
@@ -161,8 +162,6 @@ namespace Bot_Telegram_Ver3
                 }
             }
 
-            chromeDriver.Quit();
-
             string queryTTSV = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
             string ttsv = model.GetTTSV(queryTTSV);
 
@@ -170,7 +169,7 @@ namespace Bot_Telegram_Ver3
             return kq;
         }
 
-        public async Task<string> GuiDiem(string chatID, int mode)
+        public string GuiDiem(string chatID, int mode)
         {
             string data = "";
             try

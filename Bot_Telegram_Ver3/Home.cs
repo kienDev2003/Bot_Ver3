@@ -101,29 +101,24 @@ namespace Bot_Telegram_Ver3
 
         }
 
-        private static async void Bot_OnMessage(object sender, MessageEventArgs e)
-        {
-            string message = e.Message.Text;
-            string chatID = e.Message.Chat.Id.ToString();
+        static KeyboardButton thoiKhoaBieu = new KeyboardButton("Thời Khóa Biểu Hôm Nay");
+        static KeyboardButton thoiKhoaBieuMai = new KeyboardButton("Thời Khóa Biểu Ngày Mai");
+        static KeyboardButton themDuLieu = new KeyboardButton("Thêm Dữ Liệu");
+        static KeyboardButton xoaDuLieu = new KeyboardButton("Xóa Dữ Liệu");
+        static KeyboardButton lichThi = new KeyboardButton("Lịch Thi");
+        static KeyboardButton diemHKTruoc = new KeyboardButton("Điểm Học Kỳ Trước");
+        static KeyboardButton diemHKNay = new KeyboardButton("Điểm Học Kỳ Này");
+        static KeyboardButton lichHocTuanNay = new KeyboardButton("Lịch Học Tuần Này");
+        static KeyboardButton lichHocTuanSau = new KeyboardButton("Lịch Học Tuần Sau");
+        static KeyboardButton lichHoc3TuanSau = new KeyboardButton("Lịch Học 3 Tuần Sau");
+        static KeyboardButton thoiGianBieu = new KeyboardButton("Thời Gian Biểu VNUA");
+        static KeyboardButton batThongBao = new KeyboardButton("Bật Thông Báo");
+        static KeyboardButton tatThongBao = new KeyboardButton("Tắt Thông Báo");
+        static KeyboardButton hocPhi = new KeyboardButton("Học Phí");
 
-            var thoiKhoaBieu = new KeyboardButton("Thời Khóa Biểu Hôm Nay");
-            var thoiKhoaBieuMai = new KeyboardButton("Thời Khóa Biểu Ngày Mai");
-            var themDuLieu = new KeyboardButton("Thêm Dữ Liệu");
-            var xoaDuLieu = new KeyboardButton("Xóa Dữ Liệu");
-            var lichThi = new KeyboardButton("Lịch Thi");
-            var diemHKTruoc = new KeyboardButton("Điểm Học Kỳ Trước");
-            var diemHKNay = new KeyboardButton("Điểm Học Kỳ Này");
-            var lichHocTuanNay = new KeyboardButton("Lịch Học Tuần Này");
-            var lichHocTuanSau = new KeyboardButton("Lịch Học Tuần Sau");
-            var lichHoc3TuanSau = new KeyboardButton("Lịch Học 3 Tuần Sau");
-            var thoiGianBieu = new KeyboardButton("Thời Gian Biểu VNUA");
-            var batThongBao = new KeyboardButton("Bật Thông Báo");
-            var tatThongBao = new KeyboardButton("Tắt Thông Báo");
-            var hocPhi = new KeyboardButton("Học Phí");
-
-            var keyboard = new ReplyKeyboardMarkup(
-                                new[]
-                    {
+        static ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(
+                            new[]
+                {
                         new[]
                         {
                         themDuLieu
@@ -168,9 +163,14 @@ namespace Bot_Telegram_Ver3
                         {
                             xoaDuLieu,
                         },
-                    }
-                                );
-            var removeKeyboard = new ReplyKeyboardRemove();
+                }
+                            );
+        static ReplyKeyboardRemove removeKeyboard = new ReplyKeyboardRemove();
+
+        private static async void Bot_OnMessage(object sender, MessageEventArgs e)
+        {
+            string message = e.Message.Text;
+            string chatID = e.Message.Chat.Id.ToString();
 
             string infoNguoiDung = controller.ThongTinSV(chatID);
             if (infoNguoiDung == "") Console.WriteLine($"{DateTime.Now.ToString("HH:mm")} {chatID}-- Message: {message}");
@@ -413,7 +413,7 @@ namespace Bot_Telegram_Ver3
                     bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
                     if (run == 0)
                     {
-                        string test = controller.GuiHocPhi(chatID);
+                        string test = await controller.GuiHocPhi(chatID);
                         bot.SendTextMessageAsync(chatID, test, ParseMode.Html);
                     }
                     else
@@ -462,10 +462,10 @@ namespace Bot_Telegram_Ver3
             run = 0;
         }
 
-        private static async void XemDiem(string chatID, int mode)
+        private static void XemDiem(string chatID, int mode)
         {
             run = 1;
-            string diem = await controller.GuiDiem(chatID, mode);
+            string diem = controller.GuiDiem(chatID, mode);
             bot.SendTextMessageAsync(chatID, diem, ParseMode.Html);
             run = 0;
         }
