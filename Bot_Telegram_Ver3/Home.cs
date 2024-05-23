@@ -471,10 +471,10 @@ namespace Bot_Telegram_Ver3
             run = 0;
         }
 
-        private static void XemDiem(string chatID, int mode)
+        private static async void XemDiem(string chatID, int mode)
         {
             run = 1;
-            string diem = controller.GuiDiem(chatID, mode);
+            string diem = await controller.GuiDiem(chatID, mode);
             bot.SendTextMessageAsync(chatID, diem, ParseMode.Html);
             run = 0;
         }

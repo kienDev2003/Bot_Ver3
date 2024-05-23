@@ -170,9 +170,10 @@ namespace Bot_Telegram_Ver3
             return kq;
         }
 
-        public string GuiDiem(string chatID, int mode)
+        public async Task<string> GuiDiem(string chatID, int mode)
         {
             string data = "";
+            string htmlDiem = "";
             try
             {
                 string hocKyXemDiem = "";
@@ -181,24 +182,36 @@ namespace Bot_Telegram_Ver3
 
                 string query = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";
                 string msv = model.GetMaSVKiemTra(query);
+                string url = urlDiem + msv;
 
-                ChromeDriverService service = ChromeDriverService.CreateDefaultService();
-                service.HideCommandPromptWindow = true;
-                ChromeOptions chromeOptions = new ChromeOptions();
-                chromeOptions.AddArgument("--headless");
-                IWebDriver chromeDriver = new ChromeDriver(service, chromeOptions);
+                using (HttpClient client = new HttpClient())
+                {
+                    //Gửi yêu cầu GET để lấy trang
+                    HttpResponseMessage response = await client.GetAsync(url); // Sử dụng await
+                    response.EnsureSuccessStatusCode();
+                    string responseBody = await response.Content.ReadAsStringAsync(); // Sử dụng await
 
-                chromeDriver.Navigate().GoToUrl(urlDiem + msv);
+                    // Sử dụng HtmlAgilityPack để lấy giá trị của __VIEWSTATE
+                    var htmlDoc = new HtmlDocument();
+                    htmlDoc.LoadHtml(responseBody);
+                    var viewStateNode = htmlDoc.DocumentNode.SelectSingleNode("//input[@name='__VIEWSTATE']");
+                    string viewState = viewStateNode.GetAttributeValue("value", "");
 
-                var txtHocKy = chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_txtChonHK"));
-                txtHocKy.SendKeys(hocKyXemDiem);
+                    var formData = new FormUrlEncodedContent(new[]
+                            {
+                    new KeyValuePair<string, string>("__EVENTTARGET", ""),
+                    new KeyValuePair<string, string>("__EVENTARGUMENT", ""),
+                    new KeyValuePair<string, string>("__VIEWSTATE", viewState),
+                    new KeyValuePair<string, string>("__VIEWSTATEGENERATOR", "CA0B0334"),
+                    new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$txtChonHK", hocKyXemDiem),
+                    new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$btnChonHK", "Xem"),
+                });
 
-                Thread.Sleep(2000);
+                    HttpResponseMessage response1 = await client.PostAsync(url, formData);
+                    response1.EnsureSuccessStatusCode();
 
-                chromeDriver.FindElement(By.Id("ctl00_ContentPlaceHolder1_ctl00_btnChonHK")).Click();
-
-                string htmlDiem = chromeDriver.PageSource;
-
+                    htmlDiem = await response1.Content.ReadAsStringAsync();
+                }
 
                 HtmlDocument htmlDocument = new HtmlDocument();
                 htmlDocument.LoadHtml(htmlDiem);
