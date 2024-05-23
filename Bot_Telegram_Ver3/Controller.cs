@@ -1,7 +1,4 @@
 ﻿using HtmlAgilityPack;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -787,19 +784,6 @@ namespace Bot_Telegram_Ver3
                 return $"<b>Chưa có dữ liệu</b>. Hãy chọn chức năng Thêm dữ liệu của bạn!";
             }
             return "";
-        }
-
-        private bool CheckAlert(IWebDriver driver)
-        {
-            try
-            {
-                driver.SwitchTo().Alert();
-                return true;
-            }
-            catch (NoAlertPresentException)
-            {
-                return false;
-            }
         }
 
         private string TachLayNgayDauTienBDTuan(string input)
