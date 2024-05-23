@@ -421,6 +421,15 @@ namespace Bot_Telegram_Ver3
                         bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
                     }
                 }
+                else if(message == "On")
+                {
+                    string domain = ConfigurationManager.AppSettings["domain"].ToString();
+                    string mac = ConfigurationManager.AppSettings["mac"].ToString();
+
+                    string text = controller.SendWakeOnLan(domain, mac);
+
+                    bot.SendTextMessageAsync(chatID, text, ParseMode.Html);
+                }
                 else
                 {
                     bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");

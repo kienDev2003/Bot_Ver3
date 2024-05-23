@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Text;
@@ -682,7 +683,7 @@ namespace Bot_Telegram_Ver3
             string htmlLichThiNew;
             try
             {
-                
+
 
                 string htmlAll = await LayHtmlLichThi(maSV, _urlLichThi, hocKy);
 
@@ -739,7 +740,7 @@ namespace Bot_Telegram_Ver3
             {
                 string urlTKB = urlTkb + maSV;
                 string html;
-                
+
                 html = await LayHtmlTKB(maSV, urlTKB, hocKy);
 
                 HtmlAgilityPack.HtmlDocument document = new HtmlAgilityPack.HtmlDocument();
@@ -922,6 +923,40 @@ namespace Bot_Telegram_Ver3
                 return responseBody;
             }
 
+        }
+
+        public string SendWakeOnLan(string domain, string macAddress)
+        {
+            string ipAddressStr = GetIPAddressFromDomain(domain);
+
+            byte[] macBytes = macAddress.Split('-').Select(s => Convert.ToByte(s, 16)).ToArray();
+            byte[] wolPacket = new byte[102];
+
+            for (int i = 0; i < 6; i++)
+            {
+                wolPacket[i] = 0xFF;
+            }
+
+            for (int i = 6; i < 102; i += 6)
+            {
+                macBytes.CopyTo(wolPacket, i);
+            }
+
+            IPAddress ipAddress = IPAddress.Parse(ipAddressStr);
+            IPEndPoint endPoint = new IPEndPoint(ipAddress, 9);
+
+            using (UdpClient client = new UdpClient())
+            {
+                client.Send(wolPacket, wolPacket.Length, endPoint);
+            }
+
+            return $"Đã bật PC. Địa chỉ {ipAddress}";
+        }
+
+        static string GetIPAddressFromDomain(string domain)
+        {
+            IPAddress[] addresses = Dns.GetHostAddresses(domain);
+            return addresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork)?.ToString();
         }
     }
 }
