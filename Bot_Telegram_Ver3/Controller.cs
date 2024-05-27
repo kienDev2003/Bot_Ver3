@@ -174,7 +174,18 @@ namespace Bot_Telegram_Ver3
             try
             {
                 string hocKyXemDiem = "";
-                if (mode == 1) hocKyXemDiem = (Convert.ToInt32(hocKy) - 1).ToString();
+                if (mode == 1)
+                {
+                    if (hocKy.Last() == '1')
+                    {
+                        hocKyXemDiem = (Convert.ToInt32(hocKy) - 9).ToString();
+                    }
+                    else
+                    {
+                        hocKyXemDiem = (Convert.ToInt32(hocKy) - 1).ToString();
+                    }
+
+                }
                 else hocKyXemDiem = hocKy;
 
                 string query = $"SELECT * FROM tblTTSV WHERE ChatID = '{chatID}'";

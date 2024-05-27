@@ -1,6 +1,3 @@
-E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\selenium-manager\linux\selenium-manager
-E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\selenium-manager\macos\selenium-manager
-E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\selenium-manager\windows\selenium-manager.exe
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\Bot_Telegram_Ver3.exe.config
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\Bot_Telegram_Ver3.exe
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\Bot_Telegram_Ver3.pdb
@@ -15,8 +12,6 @@ E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\System.Data.SQLite.Linq.dll
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\System.Threading.Tasks.Extensions.dll
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\Telegram.Bot.dll
-E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\WebDriver.dll
-E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\WebDriver.Support.dll
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\EntityFramework.xml
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\EntityFramework.SqlServer.xml
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\HtmlAgilityPack.pdb
@@ -27,8 +22,6 @@ E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\System.Data.SQLite.xml
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\System.Threading.Tasks.Extensions.xml
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\Telegram.Bot.xml
-E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\WebDriver.xml
-E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\bin\Debug\WebDriver.Support.xml
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.csproj.AssemblyReference.cache
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Telegram_Ver3.csproj.CoreCompileInputs.cache
 E:\Project_Dev\Bot_Ver3\Bot_Telegram_Ver3\obj\Debug\Bot_Tele.A68DFD98.Up2Date
