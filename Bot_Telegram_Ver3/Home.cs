@@ -183,7 +183,7 @@ namespace Bot_Telegram_Ver3
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu != "")
                     {
-                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                         return;
                     }
                     DateTime date = DateTime.Now;
@@ -191,14 +191,14 @@ namespace Bot_Telegram_Ver3
                     string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
 
                     string data = controller.GuiTKB(chatID, ngay, thu);
-                    bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+                    await bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
                 }
                 else if (message == "Thời Khóa Biểu Ngày Mai")
                 {
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu != "")
                     {
-                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                         return;
                     }
                     DateTime date = DateTime.Now.AddDays(1);
@@ -206,14 +206,14 @@ namespace Bot_Telegram_Ver3
                     string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
 
                     string data = controller.GuiTKB(chatID, ngay, thu);
-                    bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+                    await bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
                 }
                 else if (message == "Lịch Học Tuần Này")
                 {
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu != "")
                     {
-                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                         return;
                     }
                     DateTime date = DateTime.Now;
@@ -221,14 +221,14 @@ namespace Bot_Telegram_Ver3
                     string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
 
                     string data = controller.GuiTKBTQTuan(1, chatID, ngay);
-                    bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+                    await bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
                 }
                 else if (message == "Lịch Học Tuần Sau")
                 {
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu != "")
                     {
-                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                         return;
                     }
                     DateTime date = DateTime.Now;
@@ -236,21 +236,21 @@ namespace Bot_Telegram_Ver3
                     string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
 
                     string data = controller.GuiTKBTQTuan(2, chatID, ngay);
-                    bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+                    await bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
                 }
                 else if (message == "Lịch Thi")
                 {
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu != "")
                     {
-                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                         return;
                     }
                     DateTime date = DateTime.Now;
                     string ngay = date.ToString("yyyy-MM-dd");
 
                     string data = controller.GuiLichThi(chatID, ngay);
-                    bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+                    await bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
                 }
                 else if (message == "Xóa Dữ Liệu")
                 {
@@ -260,31 +260,31 @@ namespace Bot_Telegram_Ver3
                         string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                         if (kiemTraDuLieu != "")
                         {
-                            bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                            await bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                             return;
                         }
                         xoa = controller.XoaDuLieu(chatID);
                     }
                     else
                     {
-                        bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thực hiện lại sau 10 giây");
+                        await bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thực hiện lại sau 10 giây");
                         return;
                     }
                     if (xoa > 0)
                     {
-                        bot.SendTextMessageAsync(chatID, "Xóa dữ liệu thành công");
+                        await bot.SendTextMessageAsync(chatID, "Xóa dữ liệu thành công");
                     }
-                    else bot.SendTextMessageAsync(chatID, "Xóa dữ liệu KHÔNG thành công");
+                    else await bot.SendTextMessageAsync(chatID, "Xóa dữ liệu KHÔNG thành công");
                 }
                 else if (message == "Thêm Dữ Liệu")
                 {
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu == "")
                     {
-                        bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, $"<b>Đã có dữ liệu</b>. Nếu muốn thêm lại vui lòng Xóa dữ liệu cũ trước!", ParseMode.Html);
                         return;
                     }
-                    bot.SendTextMessageAsync(chatID, "Nhập Mã Sinh Viên của Bạn\n<b>Ví dụ:</b> 6655010", ParseMode.Html, replyMarkup: removeKeyboard);
+                    await bot.SendTextMessageAsync(chatID, "Nhập Mã Sinh Viên của Bạn\n<b>Ví dụ:</b> 6655010", ParseMode.Html, replyMarkup: removeKeyboard);
                     modeThem = 1;
                 }
                 else if (message != "" && modeThem != 0)
@@ -293,9 +293,9 @@ namespace Bot_Telegram_Ver3
                     {
                         string kq = await ThemDuLieu(chatID, message);
                         modeThem = 0;
-                        bot.SendTextMessageAsync(chatID, kq, ParseMode.Html, replyMarkup: keyboard);
+                        await bot.SendTextMessageAsync(chatID, kq, ParseMode.Html, replyMarkup: keyboard);
                     }
-                    else bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                    else await bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
 
                 }
                 else if (message == "/start")
@@ -303,7 +303,7 @@ namespace Bot_Telegram_Ver3
                     string text = $"<b>Chào mừng bạn đến với XemTKB_VNUA</b>\n\n" +
                                   $"Hãy chọn chức năng <b>Bên Dưới</b> để sử dụng!";
 
-                    bot.SendTextMessageAsync(chatID, text, ParseMode.Html, replyMarkup: keyboard);
+                    await bot.SendTextMessageAsync(chatID, text, ParseMode.Html, replyMarkup: keyboard);
                 }
                 else if (message == "Thời Gian Biểu VNUA")
                 {
@@ -327,7 +327,7 @@ namespace Bot_Telegram_Ver3
                     int kq = controller.SetThongBao(1, chatID);
                     if (kq > 0)
                     {
-                        bot.SendTextMessageAsync(chatID, "Bật thông báo <b>Thành công</b>", ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, "Bật thông báo <b>Thành công</b>", ParseMode.Html);
                     }
                 }
                 else if (message == "Tắt Thông Báo")
@@ -335,7 +335,7 @@ namespace Bot_Telegram_Ver3
                     int kq = controller.SetThongBao(0, chatID);
                     if (kq > 0)
                     {
-                        bot.SendTextMessageAsync(chatID, "Tắt thông báo <b>Thành công</b>", ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, "Tắt thông báo <b>Thành công</b>", ParseMode.Html);
                     }
                 }
                 else if (message == "/kt")
@@ -347,17 +347,17 @@ namespace Bot_Telegram_Ver3
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu != "")
                     {
-                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                         return;
                     }
-                    bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
+                    await bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
                     if (run == 0)
                     {
                         XemDiem(chatID, 1);
                     }
                     else
                     {
-                        bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                        await bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
                     }
 
                 }
@@ -366,17 +366,17 @@ namespace Bot_Telegram_Ver3
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu != "")
                     {
-                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                         return;
                     }
-                    bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
+                    await bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
                     if (run == 0)
                     {
                         XemDiem(chatID, 0);
                     }
                     else
                     {
-                        bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                        await bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
                     }
                 }
                 else if (message == "Lịch Học 3 Tuần Sau")
@@ -384,7 +384,7 @@ namespace Bot_Telegram_Ver3
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu != "")
                     {
-                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                         return;
                     }
                     DateTime date = DateTime.Now;
@@ -396,7 +396,7 @@ namespace Bot_Telegram_Ver3
                         string thu = controller.ChuyenThuTiengAnhSangTiengViet(date.DayOfWeek);
 
                         string data = controller.GuiTKBTQTuan(1, chatID, ngay);
-                        bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, data, ParseMode.Html);
 
                         thread.Sleep(800);
                     }
@@ -407,18 +407,18 @@ namespace Bot_Telegram_Ver3
                     string kiemTraDuLieu = controller.KiemTraTonTaiDuLieu(chatID);
                     if (kiemTraDuLieu != "")
                     {
-                        bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, kiemTraDuLieu, ParseMode.Html);
                         return;
                     }
-                    bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
+                    await bot.SendTextMessageAsync(chatID, "Đang truy vấn. Vui lòng chờ !");
                     if (run == 0)
                     {
                         string test = await controller.GuiHocPhi(chatID);
-                        bot.SendTextMessageAsync(chatID, test, ParseMode.Html);
+                        await bot.SendTextMessageAsync(chatID, test, ParseMode.Html);
                     }
                     else
                     {
-                        bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
+                        await bot.SendTextMessageAsync(chatID, "Hệ thống đang bận. Vui lòng thêm dữ liệu lại sau 10 giây");
                     }
                 }
                 else if(message == "On")
@@ -428,17 +428,17 @@ namespace Bot_Telegram_Ver3
 
                     string text = controller.SendWakeOnLan(domain, mac);
 
-                    bot.SendTextMessageAsync(chatID, text, ParseMode.Html);
+                    await bot.SendTextMessageAsync(chatID, text, ParseMode.Html);
                 }
                 else
                 {
-                    bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");
+                    await bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");
                 }
             }
             catch (Exception ex)
             {
                 run = 0;
-                bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");
+                await bot.SendTextMessageAsync(chatID, "Sai cú pháp. Nhập /start để xem lại hướng dẫn");
             }
         }
 
@@ -458,7 +458,7 @@ namespace Bot_Telegram_Ver3
                 run = 0;
                 return "Vui lòng kiểm tra lại mã sinh viên!";
             }
-            bot.SendTextMessageAsync(chatID, "Đang lấy dữ liệu! Vui lòng chờ!");
+            await bot.SendTextMessageAsync(chatID, "Đang lấy dữ liệu! Vui lòng chờ!");
             string kq = await controller.ThemDuLieu(chatID, maSV);
             run = 0;
             return kq;
@@ -475,7 +475,7 @@ namespace Bot_Telegram_Ver3
         {
             run = 1;
             string diem = await controller.GuiDiem(chatID, mode);
-            bot.SendTextMessageAsync(chatID, diem, ParseMode.Html);
+            await bot.SendTextMessageAsync(chatID, diem, ParseMode.Html);
             run = 0;
         }
     }

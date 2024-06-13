@@ -691,7 +691,7 @@ namespace Bot_Telegram_Ver3
                 if (tkb || lt)
                 {
                     string text = $"<b>Dữ liệu</b> của bạn có sự <b>thay đổi</b>. Hãy <b>Xóa dữ liệu</b> và <b>Thêm dữ liệu mới</b> của bạn. Hãy làm điều trên để nắm bắt <b>Lịch Học,Lịch Thi</b> chính xác nhất !";
-                    bot.SendTextMessageAsync(_chatID, text, ParseMode.Html);
+                    await bot.SendTextMessageAsync(_chatID, text, ParseMode.Html);
                     Console.WriteLine($"{ThongTinSV(_chatID)}--Ngày kiểm tra: {DateTime.Now.ToString("dd-MM-yyyy")}");
                 }
                 else continue;
@@ -828,18 +828,18 @@ namespace Bot_Telegram_Ver3
 
             if (_hocKy == '1')
             {
-                for (int i = 1; i <= 20; i++)
+                for (int i = 1; i <= 99; i++)
                 {
                     if (_ngay >= date && _ngay < date.AddDays(7))
                     {
                         return i;
                     }
-                    else date.AddDays(7);
+                    else  date = date.AddDays(7);
                 }
             }
             else if (_hocKy == '2')
             {
-                for (int i = 1; i <= 22; i++)
+                for (int i = 1; i <= 99; i++)
                 {
                     if (_ngay >= date && _ngay < date.AddDays(7))
                     {
