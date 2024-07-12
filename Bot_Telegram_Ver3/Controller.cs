@@ -826,7 +826,9 @@ namespace Bot_Telegram_Ver3
             DateTime date = DateTime.ParseExact(ngayBatDauHocKy, "dd/MM/yyyy", CultureInfo.CurrentCulture);
             DateTime _ngay = DateTime.ParseExact(ngay, "yyyy-MM-dd", CultureInfo.CurrentCulture);
 
-            if (_hocKy == '1')
+            int __hocky = -1;
+            __hocky = int.Parse(_hocKy.ToString());
+            if (__hocky != -1)
             {
                 for (int i = 1; i <= 99; i++)
                 {
@@ -835,17 +837,6 @@ namespace Bot_Telegram_Ver3
                         return i;
                     }
                     else  date = date.AddDays(7);
-                }
-            }
-            else if (_hocKy == '2')
-            {
-                for (int i = 1; i <= 99; i++)
-                {
-                    if (_ngay >= date && _ngay < date.AddDays(7))
-                    {
-                        return i;
-                    }
-                    else date = date.AddDays(7);
                 }
             }
             return 0;
