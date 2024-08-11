@@ -32,6 +32,7 @@ namespace Bot_Telegram_Ver3
         private static string urlDiem = ConfigurationManager.AppSettings["urlDiem"].ToString();
         private static string urlHocPhi = ConfigurationManager.AppSettings["urlHocPhi"].ToString();
         private char _hocKy = hocKy.Last();
+        private HttpConnect httpClient = new HttpConnect();
 
         public string GuiTKB(string chatID, string ngay, string thu)
         {
@@ -194,38 +195,25 @@ namespace Bot_Telegram_Ver3
                 string msv = model.GetMaSVKiemTra(query);
                 string url = urlDiem + msv;
 
-                using (HttpClient client = new HttpClient())
+                string responseBody = await httpClient.GetRequest(url);
+
+                string viewState = httpClient.GetViewSate(responseBody);
+
+                // Kiem tra co capcha hay khong
+                var htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                var capcha = htmlDoc.DocumentNode.DescendantNodes().Where(cap => cap.Attributes.Contains("id") && cap.Attributes["id"].Value == "ctl00_ContentPlaceHolder1_ctl00_lblCapcha").FirstOrDefault();
+                if (capcha != null)
                 {
-                    //Gửi yêu cầu GET để lấy trang
-                    HttpResponseMessage response = await client.GetAsync(url); // Sử dụng await
-                    response.EnsureSuccessStatusCode();
-                    string responseBody = await response.Content.ReadAsStringAsync(); // Sử dụng await
+                    string _html = await httpClient.SendPostRequest(viewState, url, capcha.InnerText.Trim(), "", "");
 
-                    // Sử dụng HtmlAgilityPack để lấy giá trị của __VIEWSTATE
-                    var htmlDoc = new HtmlDocument();
-                    htmlDoc.LoadHtml(responseBody);
-                    var viewStateNode = htmlDoc.DocumentNode.SelectSingleNode("//input[@name='__VIEWSTATE']");
-                    string viewState = viewStateNode.GetAttributeValue("value", "");
+                    string responseBody2 = await httpClient.GetRequest(url);
 
-                    // Kiem tra co capcha hay khong
-                    var capcha = htmlDoc.DocumentNode.DescendantNodes().Where(cap => cap.Attributes.Contains("id") && cap.Attributes["id"].Value == "ctl00_ContentPlaceHolder1_ctl00_lblCapcha").FirstOrDefault();
-                    if (capcha != null)
-                    {
-                        string _html = await SendPostRequest(client, viewState, url, capcha.InnerText.Trim(), "", "");
+                    string viewState2 = httpClient.GetViewSate(responseBody2);
 
-                        response = await client.GetAsync(url); // Sử dụng await
-                        response.EnsureSuccessStatusCode();
-                        string responseBody2 = await response.Content.ReadAsStringAsync(); // Sử dụng await
-
-                        // Sử dụng HtmlAgilityPack để lấy giá trị của __VIEWSTATE
-                        htmlDoc.LoadHtml(responseBody2);
-                        var viewStateNode2 = htmlDoc.DocumentNode.SelectSingleNode("//input[@name='__VIEWSTATE']");
-                        string viewState2 = viewStateNode2.GetAttributeValue("value", "");
-
-                        htmlDiem = await SendPostRequest(client, viewState2, url, "XemDiem","",hocKyXemDiem); // Sử dụng await
-                    }
-                    else htmlDiem = await SendPostRequest(client, viewState, url, "XemDiem", "", hocKyXemDiem);
+                    htmlDiem = await httpClient.SendPostRequest(viewState2, url, "XemDiem", "", hocKyXemDiem);
                 }
+                else htmlDiem = await httpClient.SendPostRequest(viewState, url, "XemDiem", "", hocKyXemDiem);
+
 
                 HtmlDocument htmlDocument = new HtmlDocument();
                 htmlDocument.LoadHtml(htmlDiem);
@@ -493,24 +481,17 @@ namespace Bot_Telegram_Ver3
                 using (HttpClient client = new HttpClient())
                 {
                     // Gửi yêu cầu GET để lấy trang
-                    HttpResponseMessage response = await client.GetAsync(urlLT); // Sử dụng await
-                    response.EnsureSuccessStatusCode();
-                    string responseBody = await response.Content.ReadAsStringAsync(); // Sử dụng await
+                    string responseBody = await httpClient.GetRequest(urlLT);
 
-                    var htmlDoc = new HtmlDocument();
-                    htmlDoc.LoadHtml(responseBody);
-                    var viewStateNode = htmlDoc.DocumentNode.SelectSingleNode("//input[@name='__VIEWSTATE']");
-                    string viewState = viewStateNode.GetAttributeValue("value", "");
-
+                    string viewState = httpClient.GetViewSate(responseBody);
                     // Kiem tra co capcha hay khong
+                    var htmlDoc = new HtmlAgilityPack.HtmlDocument();
                     var capcha = htmlDoc.DocumentNode.DescendantNodes().Where(cap => cap.Attributes.Contains("id") && cap.Attributes["id"].Value == "ctl00_ContentPlaceHolder1_ctl00_lblCapcha").FirstOrDefault();
                     if (capcha != null)
                     {
-                        string _html = await SendPostRequest(client, viewState, urlLT, capcha.InnerText.Trim(),"","");
+                        string _html = await SendPostRequest(client, viewState, urlLT, capcha.InnerText.Trim(), "", "");
 
-                        response = await client.GetAsync(urlLT); // Sử dụng await
-                        response.EnsureSuccessStatusCode();
-                        htmlLichThi = await response.Content.ReadAsStringAsync();
+                        htmlLichThi = await httpClient.GetRequest(urlLT);
 
                     }
                     else htmlLichThi = responseBody;
@@ -671,36 +652,26 @@ namespace Bot_Telegram_Ver3
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    // Gửi yêu cầu GET để lấy trang
-                    HttpResponseMessage response = await client.GetAsync(urlTKB); // Sử dụng await
-                    response.EnsureSuccessStatusCode();
-                    string responseBody = await response.Content.ReadAsStringAsync(); // Sử dụng await
+                    string responseBody = await httpClient.GetRequest(urlTKB);
 
-                    var htmlDoc = new HtmlDocument();
-                    htmlDoc.LoadHtml(responseBody);
-                    var viewStateNode = htmlDoc.DocumentNode.SelectSingleNode("//input[@name='__VIEWSTATE']");
-                    string viewState = viewStateNode.GetAttributeValue("value", "");
+                    string viewState = httpClient.GetViewSate(responseBody);
 
                     // Kiem tra co capcha hay khong
+                    var htmlDoc = new HtmlAgilityPack.HtmlDocument();
                     var capcha = htmlDoc.DocumentNode.DescendantNodes().Where(cap => cap.Attributes.Contains("id") && cap.Attributes["id"].Value == "ctl00_ContentPlaceHolder1_ctl00_lblCapcha").FirstOrDefault();
                     if (capcha != null)
                     {
-                        string _html = await SendPostRequest(client, viewState, urlTKB, capcha.InnerText.Trim(),"","");
+                        string _html = await httpClient.SendPostRequest(viewState, urlTKB, capcha.InnerText.Trim(), "", "");
 
-                        // Gửi yêu cầu GET để lấy trang
-                        HttpResponseMessage response2 = await client.GetAsync(urlTKB); // Sử dụng await
-                        response.EnsureSuccessStatusCode();
-                        string responseBody2 = await response2.Content.ReadAsStringAsync(); // Sử dụng await
+                        string responseBody2 = await httpClient.GetRequest(urlTKB);
+                        string viewState2 = httpClient.GetViewSate(responseBody2);
 
-                        var htmlDoc2 = new HtmlDocument();
-                        htmlDoc2.LoadHtml(responseBody2);
-                        var viewStateNode2 = htmlDoc2.DocumentNode.SelectSingleNode("//input[@name='__VIEWSTATE']");
-                        string viewState2 = viewStateNode2.GetAttributeValue("value", "");
-
-
-                        html = await SendPostRequest(client, viewState2, urlTKB, "ThemDuLieu","",""); // Sử dụng await
+                        html = await httpClient.SendPostRequest(viewState2, urlTKB, "ThemDuLieu", "", "");
                     }
-                    else html = await SendPostRequest(client, viewState, urlTKB, "ThemDuLieu", "", "");
+                    else
+                    {
+                        html = await httpClient.SendPostRequest(viewState, urlTKB, "ThemDuLieu", "", "");
+                    }
                 }
                 return html;
 
@@ -920,47 +891,53 @@ namespace Bot_Telegram_Ver3
             }
         }
 
-        static async Task<string> SendPostRequest(HttpClient client, string viewState, string url, string mode,string msv,string hocKyXemDiem)
+        static async Task<string> SendPostRequest(HttpClient client, string viewState, string url, string mode, string msv, string hocKyXemDiem)
         {
             FormUrlEncodedContent formData = null;
-
-            if (mode == "XemDiem")
+            try
             {
-                formData = new FormUrlEncodedContent(new[]
+                if (mode == "XemDiem")
                 {
+                    formData = new FormUrlEncodedContent(new[]
+                    {
                     new KeyValuePair<string, string>("__EVENTTARGET", "ctl00$ContentPlaceHolder1$ctl00$btnChonHK"),
                     new KeyValuePair<string, string>("__EVENTARGUMENT", ""),
                     new KeyValuePair<string, string>("__VIEWSTATE", viewState),
-                    new KeyValuePair<string, string>("__VIEWSTATEGENERATOR", "CA0B0334"),
+                    new KeyValuePair<string, string>("__VIEWSTATEGENERATOR", ""),
                     new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$txtChonHK", hocKyXemDiem),
                     new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$btnChonHK", "Xem"),
                 });
-            }
-            else if (mode == "ThemDuLieu")
-            {
-                formData = new FormUrlEncodedContent(new[]
+                }
+                else if (mode == "ThemDuLieu")
                 {
+                    formData = new FormUrlEncodedContent(new[]
+                    {
                     new KeyValuePair<string, string>("__EVENTTARGET", "ctl00$ContentPlaceHolder1$ctl00$rad_ThuTiet"),
                     new KeyValuePair<string, string>("__EVENTARGUMENT", ""),
                     new KeyValuePair<string, string>("__LASTFOCUS", ""),
                     new KeyValuePair<string, string>("__VIEWSTATE", viewState),
-                    new KeyValuePair<string, string>("__VIEWSTATEGENERATOR", "CA0B0334"),
+                    new KeyValuePair<string, string>("__VIEWSTATEGENERATOR", ""),
                     new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$ddlChonNHHK", hocKy),
                     new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$rad_ThuTiet", "rad_ThuTiet"),
                 });
-            }
-            else
-            {
-                formData = new FormUrlEncodedContent(new[]
+                }
+                else
                 {
+                    formData = new FormUrlEncodedContent(new[]
+                    {
                     new KeyValuePair<string, string>("__EVENTTARGET", ""),
                     new KeyValuePair<string, string>("__EVENTARGUMENT", ""),
                     new KeyValuePair<string, string>("__LASTFOCUS", ""),
                     new KeyValuePair<string, string>("__VIEWSTATE", viewState),
-                    new KeyValuePair<string, string>("__EVENTVALIDATION", "CA0B0334"),
+                    new KeyValuePair<string, string>("__EVENTVALIDATION", ""),
                     new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$txtCaptcha", mode),
                     new KeyValuePair<string, string>("ctl00$ContentPlaceHolder1$ctl00$btnXacNhan", "Vào website"),
                     });
+                }
+            }
+            catch (Exception ex)
+            {
+                string x = "";
             }
 
             HttpResponseMessage response = await client.PostAsync(url, formData);
